@@ -3,23 +3,27 @@
     <body id="bbody" style="display: flex; justify-content: center; align-items: center; flex-direction: column; height: 100vh;">
     </body>
     <!-- 리액트 스크립트 -->
-    <script src="https://unpkg.com/react@17.0.2/umd/react.production.min.js"></script>
+    <!-- <script src="https://unpkg.com/react@17.0.2/umd/react.production.min.js"></script> -->
+    <script src="https://unpkg.com/react@17.0.2/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js"></script>
     <!-- 바벨 => 리액트를 사용하여 JS에 HTML로 적은 코드를 리액트 코드로 변환해주는 라이브러리 -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- 컴포넌트의 파라미터 오브젝트 값의 프로퍼티를 지정하여 해당 타입에 맞지 않는 데이터가 넘어올 시, 콘솔에러를 띄워준다 -->
+    <script src="https://unpkg.com/prop-types@15.7.2/prop-types.js"></script>
     <script type="text/babel">
 
         const body = document.getElementById('bbody');
 
         //g App 컴포넌트에서 Btn 컴포넌트를 가져와서 쓸 때, props값은 밑에 App 컴포넌트 처럼 사용하고 Object로 한번에 들어간다.
-        const Btn = ({text, text_size}) => {
+        const Btn = ({text = 'default', text_size = 16, click_event}) => {
 
-            if (!text) text = 'default';
-            if (!text_size) text_size = '16';
             text_size += 'px';
+
+            console.log(text, 'is changed')
 
             return (
                 <button
+                onClick={click_event}
                 style={{
                     fontSize : text_size,
                     color : '#fff',
@@ -33,7 +37,25 @@
             )
         }
 
+        //g Btn 컴포넌트의 변경 값이 있을 때 마다 리렌더링 해준다.
+        //g App 컴포넌트에서 useState를 사용 시, 전체가 리렌더링 되기에 적절한 설계를 통한 리소스 낭비를 최적화 해야 한다.
+        const Memo_btn = React.memo(Btn);
+        Memo_btn.propTypes = {
+            text : PropTypes.string,
+            text_size : PropTypes.number.isRequired,
+            click_event : PropTypes.func
+        };
+
         const App = () => {
+
+            //g state 관리를 App 컴포넌트에서 하지만 Btn 컴포넌트에서 state 값을 사용하므로 change_text_func 이벤트가 일어날 때, App 컴포넌트 자체가 리렌더링 된다.
+            //g 다만 React.memo를 활용하여 Btn 컴포넌트가 기존 값에서 변경된 값이 있을 때만 리렌더링 된다.
+            const [change_text, change_text_func] = React.useState('prev');
+
+            const change_text_event = () => {
+
+                change_text_func((tmp_change_text) => tmp_change_text = change_text === 'prev' ? 'next' : 'prev')
+            }
 
             return (
                 <div
@@ -45,8 +67,8 @@
                     justifyContent : "center" 
                 }}
                 >
-                    <Btn text="save" text_size="20" />
-                    <Btn text="change" />
+                    <Memo_btn text={change_text} text_size={20} click_event={change_text_event} />
+                    <Memo_btn text="change" click_event="string" />
                 </div>
             )
         }

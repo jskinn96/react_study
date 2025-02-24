@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <body id="bbody">
+    </body>
+    <!-- 리액트 스크립트 -->
+    <script src="https://unpkg.com/react@17.0.2/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js"></script>
+    <!-- 바벨 => 리액트를 사용하여 JS에 HTML로 적은 코드를 리액트 코드로 변환해주는 라이브러리 -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+
+        const body = document.getElementById('bbody');
+
+        const App = () => {
+
+            //g useState는 리액트의 상태를 가지고 있음 구조는 [undefined, function];
+            //g 그렇기에 처음 값을 정의 해주고 그 값을 상수에 담을 수 있고 함수 또한 같음
+            //g count_up_func함수가 실행되었을 때, useState에 있는 count_up함수가 실행되면서 App 컵포넌트가 재생성 되며 counter 값이 증가함
+            //g 즉 state가 바뀌면 react가 컴포넌트를 refresh 해준다.
+            const [counter, count_up] = React.useState(0);
+
+            const count_up_func = () => {
+
+                //g 직접 counter 값이 영향을 받아서 리렌더링
+                // count_up(counter + 1);
+                //g 함수에서 현재 값을 인계 받아서 리렌더링
+                count_up((current) => {
+
+                    return current + 1;
+                });
+            }
+
+            console.log('rendered');
+            console.log(counter);
+
+            return (
+                <div>
+                    <h3>Total clicks : {counter}</h3>
+                    <button onClick={count_up_func}>click me</button>
+                </div>
+            )
+        }
+
+        ReactDOM.render(<App />, body);
+    </script>
+</html>

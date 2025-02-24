@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+    <body id="bbody" style="display: flex; justify-content: center; align-items: center; flex-direction: column; height: 100vh;">
+    </body>
+    <!-- 리액트 스크립트 -->
+    <script src="https://unpkg.com/react@17.0.2/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js"></script>
+    <!-- 바벨 => 리액트를 사용하여 JS에 HTML로 적은 코드를 리액트 코드로 변환해주는 라이브러리 -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+
+        const body = document.getElementById('bbody');
+
+        const Hours_to_minute = () => {
+
+            const [hours, translate_hours] = React.useState(0);
+
+            const translate_hours_func = (e) => {
+
+                const target    = e.target;
+                const hours_val = target.value;
+
+                translate_hours((current) => {
+
+                    return current = hours_val; 
+                });
+            }
+
+            const reset_time = () => {
+
+                translate_hours(0);
+            }
+
+            const [flip_val, flip_boolean] = React.useState(false);
+
+            const flip_boolean_func = () => {
+
+                reset_time();
+                flip_boolean((boolean_current) => boolean_current = !flip_val);
+            }
+
+            const hr  = !flip_val ? hours : hours / 60;
+            const min = !flip_val ? Math.round(hours * 60) : hours;
+            const sec = Math.round(min * 60);
+            
+            const filp_text = !flip_val ? 'switch min' : 'switch hr';
+
+            return (
+                <div>
+                    <h2>Hr To Min</h2>
+                    <label htmlFor="hours">Hours : </label>
+                    <input
+                    value={hr} 
+                    type="number" 
+                    placeholder="hours" 
+                    id="hours" 
+                    className="hours_class"
+                    onChange={translate_hours_func}
+                    disabled={flip_val}
+                    />
+                    <h4>{hr}hr is {min}min</h4>
+                    <label htmlFor="minutes">minutes : </label>
+                    <input 
+                    value={min}
+                    type="number" 
+                    placeholder="minutes" 
+                    id="minutes"
+                    onChange={translate_hours_func}
+                    disabled={!flip_val}
+                    />
+                    <h4>{min}min is {sec}sec</h4>
+                    <div 
+                    style={{
+                        display : "flex",
+                        gap : "10px",
+                    }}
+                    >
+                        <button
+                        onClick={reset_time}
+                        >reset</button>
+                        <button
+                        onClick={flip_boolean_func}
+                        >{filp_text}</button>
+                    </div>
+                </div>
+            )
+        }
+
+        const Killometers_to_meters = () => {
+
+            const [meas, change_meas_func] = React.useState(0);
+
+            const change_meas = (e) => {
+
+                const input_target = e.target;
+                const input_value  = input_target.value;
+                
+                change_meas_func((tmp_meas) => tmp_meas = input_value)
+            }
+            
+            const meas_reset = () => {
+
+                change_meas_func((tmp_meas) => tmp_meas = 0)
+            }
+
+            const [meas_ivt, change_meas_ivt_func] = React.useState(false);
+
+            const change_meas_ivt = () => {
+
+                meas_reset();
+
+                change_meas_ivt_func((tmp_meas_ivt) => !tmp_meas_ivt)
+            }
+
+            const km    = !meas_ivt ? meas : meas / 1000;
+            const m     = !meas_ivt ? km * 1000 : meas;
+            const cm    = m * 100;
+            
+            const switch_text = meas_ivt === false ? 'switch M' : 'switch Km';
+
+            return (
+                <div>
+                    <h2>Km To M</h2>
+                    <label htmlFor="km">Killometers : </label>
+                    <input
+                    type="number"
+                    placeholder="km"
+                    id="km"
+                    onChange={change_meas}
+                    value={km}
+                    disabled={meas_ivt} 
+                    />
+                    <h4>{km}km is {m}m</h4>
+                    <label htmlFor="meters">Meters : </label>
+                    <input
+                    type="number"
+                    placeholder="m"
+                    id="meters"
+                    onChange={change_meas} 
+                    value={m}
+                    disabled={!meas_ivt} 
+                    />
+                    <h4>{m}m is {cm}cm</h4>
+                    <div 
+                    style={{
+                        display : "flex",
+                        gap : "10px",
+                    }}
+                    >
+                        <button
+                        onClick={meas_reset}
+                        >reset</button>
+                        <button
+                        onClick={change_meas_ivt}
+                        >{switch_text}</button>
+                    </div>
+                </div>
+            )
+        }
+
+        const App = () => {
+
+            const [c_type, c_type_func] = React.useState("0");
+
+            const change_converter_type = (e) => {
+
+                const select_target = e.target;
+                const select_val    = select_target.value;
+                
+                c_type_func((tmp_c_type) => tmp_c_type = select_val)
+            }
+
+            return (
+                <div
+                style={{
+                    width : "100%",
+                    display : "flex",
+                    flexDirection : "column",
+                    alignItems : "center",
+                    justifyContent : "center" 
+                }}
+                >
+                    <h1>Super Converter</h1>
+                    <select value={c_type} onChange={change_converter_type}>
+                        <option value={0}>Choose what you want</option>
+                        <option value={1}>Hr To Min</option>
+                        <option value={2}>Km To M</option>
+                    </select>
+                    <hr 
+                    style={{
+                        width : "100%",
+                        marginTop : "20px",
+                    }}
+                    />
+                    {c_type == "1" ? <Hours_to_minute /> : null}
+                    {c_type == "2" ? <Killometers_to_meters /> : null}
+                </div>
+            )
+        }
+
+        ReactDOM.render(<App />, body);
+    </script>
+</html>

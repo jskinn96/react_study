@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+    <body id="bbody">
+    </body>
+    <!-- 리액트 스크립트 -->
+    <script src="https://unpkg.com/react@17.0.2/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js"></script>
+    <!-- 바벨 => 리액트를 사용하여 JS에 HTML로 적은 코드를 리액트 코드로 변환해주는 라이브러리 -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+        const body = document.getElementById('bbody');
+        
+        // const h3        = React.createElement('h3', {
+        //     id : "hh3", 
+        //     style : {
+        //         color : 'purple'
+        //     },
+        //     onMouseEnter : (e) => {
+        //         const target = e.currentTarget;
+        //         target.innerText = 'Oh! I\'m in!';
+        //     },
+        //     onMouseOut : (e) => {
+        //         const target = e.currentTarget;
+        //         target.innerText = 'Hello world! I\'m a title';
+        //     }
+        // }, 'Hello world! I\'m a title');
+        // const btn       = React.createElement('button', {
+        //     onClick : () => {
+        //         console.log('You clicked me!');
+        //     },
+        //     style : {
+        //         backgroundColor : 'red',
+        //     }
+        // }, 'click me');
+        // const container = React.createElement('div', null, [h3, btn]);
+        
+        //g react default
+        function H3() {
+            
+            return (
+                <h3 
+                id="hh3"
+                style={{color : "purple"}} 
+                onMouseEnter={(e) => {
+                    const target = e.currentTarget;
+                    target.innerText = 'Oh! I\'m in!';
+                }}
+                onMouseOut={(e) => {
+                    const target = e.currentTarget;
+                    target.innerText = 'Hello world! I\'m a title';
+                }}
+                >
+                    Hello world! I'm a title
+                </h3>
+            );
+        }
+
+        const Btn = () => (
+            <button
+            style={{
+                backgroundColor : "purple",
+                color : 'white',
+            }}
+            onClick={() => {
+                console.log('You cilcked me!');
+            }}
+            >
+                click me
+            </button>
+        )
+
+        const Container = () => (
+            <div>
+                <H3 />
+                <Btn />
+            </div>
+        )
+
+        // ReactDOM.render(<Container />, body);
+        //g react default End
+
+        //g react vanilla translate
+        //* 리액트랑 바닐라랑 차이점은 바닐라는 이벤트 실행 시, 전체를 리렌더링 하는 데 반해 리액트는 JS상으로는 전체를 리렌더링 하는 거 같지만(전체를 리렌더링 하는 것이 아닌 필요한 부분만 변경) HTML상으로는 필요한 부분만 변경된다.
+
+        let counter = 0;
+        function counter_up() {
+            counter += 1;
+            render();
+        }
+
+        const Title = () => (
+            <h3>
+                Total clicks : {counter}
+            </h3>
+        )
+        const Button = () => (
+            <button
+            id="cnt_btn"
+            onClick={counter_up}
+            >
+                click me
+            </button>
+        )
+        const Cnt_container = () => (
+            <div>
+                <Container />
+                <div>
+                    <Title />
+                    <Button />
+                </div>
+            </div>
+        )
+        
+        function render() {
+            ReactDOM.render(<Cnt_container />, body);
+        }
+
+        render();
+        //g react vanilla translate end
+    </script>
+</html>

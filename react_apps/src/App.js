@@ -1,85 +1,135 @@
-import Btn from "./button";
-import styles from "./app.module.css";
-//g 리액트에서 특정 기능만 가져와서 "react."을 생략하여 작성도 가능하다
 import { useState, useEffect } from "react";
 
-const HiFn = () => {
+const LoadingEl = () => {
 
-  //g HiFn 컴포넌트가 실행될 때(마운트 및 업데이트), 한번만 실행
-  useEffect(() => {
-
-    console.log('hi');
-    //g HiFn 컴포넌트가 없어지거나(언마운트) 다음 effect 전에 실행
-    //g 해당 기능은 언마운트 되었을 때, 로그 등 기록을 활용하기 위해 사용하는 경우가 많다
-    return () => {
-      console.log('bye');
-    };
-  }, []);
-
-  const byeTxt = () => {
-    
-    console.log('bye text');
-  }
-  
-  const hiTxt = () => {
-    
-    console.log('hi text');
-    
-    return byeTxt;
-  }
-  
-  //g 함수를 직접 넣어서 사용하는 방식
-  useEffect(hiTxt, []);
-
-  return (
-    <h1>Hello</h1>
-  )
+    return (<strong>loading...</strong>);
 }
 
 function App() {
-  
-  const [counter, setValue] = useState(0);
-  const [txt, setTxt] = useState("");
-  const [show, showFunc] = useState(false);
-
-  const setValue_func = () => (setValue((prev) => prev + 1));
-
-  const effect_func_test = () => {
     
-    console.log("한 번 동작");
-  }
-  //g useEffect는 이벤트를 한번만 동작 시킨다.
-  //g React.StrictMode 사용 시, 두 번 동작하여 오류 개선에 도움을 준다. 배포 환경에서는 영향 없음
-  useEffect(effect_func_test, []);
+    const [loading, loadingFunc]    = useState(true); 
+    const [coins, getCoinsFunc]     = useState([]); 
+    const [USDAmt, USDAmtFunc]      = useState(0);
+    const [coinsAmt, coinsAmtFunc]  = useState(0);
+    const [coinsSym, coinsSymFunc]  = useState('');
+    const [USDCoins, USDCoinsFunc]  = useState(0);
 
-  const setTxtFunc = (e) => setTxt((tmpTxt) => tmpTxt = e.target.value)
+    useEffect(() => {
+        
+        const fetchConinsData = async () => {
+            
+            try {
+                
+                const res       = await fetch('https://api.coinpaprika.com/v1/tickers');
+                const coinsJson = await res.json();
+                const dfCoinSym = coinsJson[0]['symbol']; 
+                const dfCoinPrc = coinsJson[0].quotes.USD.price;
 
-  //g useEffect의 함수 뒤 의존성 배열을 통해 배열에 존재하는 useState 값이 변화할 때만 이벤트 실행
-  useEffect(() => {
-    if (counter > 0) console.log(counter, '카운터만 동작 감지');
-  }, [counter]);
-  useEffect(() => {
-    if (txt !== "") console.log(txt, '텍스트만 동작 감지');
-  }, [txt]);
-  useEffect(() => {
-    if (counter > 0 || txt !== "") console.log('카운터와 텍스트 전부 동작 감지');
-  }, [counter, txt]);
-  
-  const showFn = () => showFunc((tmpShow) => !tmpShow)
+                loadingFunc(false);
+                getCoinsFunc(coinsJson);
+                coinsAmtFunc(dfCoinPrc);
+                coinsSymFunc(dfCoinSym); 
 
-  return (
-    <div>
-      <h1
-      className={styles.title}
-      >Welcome back!</h1>
-      <Btn text="Test Button" />
-      <div>{counter}</div>
-      <input type="text" value={txt} onChange={setTxtFunc} />
-      <button onClick={setValue_func}>count up</button>
-      {show ? <HiFn /> : null}
-      <button onClick={showFn}>{!show ? 'show' : 'hide'}</button>
-    </div>
-  );
+            } catch(error) {
+
+                console.error(error);
+            }
+        } 
+        fetchConinsData();
+
+    }, [])
+
+
+    const USDAmtFn = (e) => {
+
+        const input     = e.target;
+        const inputVal  = input.value.slice(0, 1) === '0'
+        ? input.value.slice(1)
+        : input.value;
+
+        inputVal !== ""
+        ? USDAmtFunc(inputVal)
+        : USDAmtFunc(0);
+    }
+
+    const coinsAmtFn = (e) => {
+
+        const select    = e.target;
+        const selectVal = select.value;
+        const selectOpt = select.options[select.selectedIndex];
+        const selectSym = selectOpt.dataset.symbol;
+        
+        coinsAmtFunc(selectVal);
+        coinsSymFunc(selectSym);
+    }
+    
+    useEffect(() => {
+        
+        if (USDAmt > 0 && coinsAmt > 0) {
+
+            const translate = USDAmt / coinsAmt;
+            USDCoinsFunc(translate);
+
+        } else {
+
+            USDCoinsFunc(0);
+        }
+
+    }, [USDAmt, coinsAmt])
+
+    return (
+        <div>
+            <h1>The Coins!</h1>
+            {
+                loading === true
+                ? (
+                    <LoadingEl />
+                ) : (
+                    <div
+                    style={{
+                        display : 'flex',
+                        flexDirection : 'column',
+                        gap : '10px',
+                        justifyContent : 'center',
+                        alignItems : 'flex-start'
+                    }}
+                    >
+                        <select
+                        onClick={coinsAmtFn}
+                        >
+                            {
+                                coins.map((coin, idx) => {
+
+                                    const coinName = coin.name;
+                                    const coinSymbol = coin.symbol;
+                                    const coinPrice = coin.quotes.USD.price;
+
+                                    return (
+                                    <option 
+                                    key={idx}
+                                    value={coinPrice}
+                                    data-symbol={coinSymbol}>{coinName} {coinSymbol} {coinPrice} USD
+                                    </option>
+                                    );
+                                })
+                            }
+                        </select>
+                        <div>
+                            <input
+                            id="USDChanger" 
+                            type="number"
+                            placeholder="USD to Conins"
+                            value={USDAmt}
+                            onChange={USDAmtFn}
+                            />
+                            <label htmlFor="USDChanger"> USD</label>
+                        </div>
+                        <div>You can buy {USDCoins} {coinsSym} with {USDAmt} USD.</div>
+                    </div>
+                )
+            }
+        </div>
+    );
 }
 
 export default App;

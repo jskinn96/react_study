@@ -2,129 +2,93 @@ import { useState, useEffect } from "react";
 
 const LoadingEl = () => {
 
-    return (<strong>loading...</strong>);
+    return (<strong>Loding......</strong>);
 }
 
 function App() {
-    
-    const [loading, loadingFunc]    = useState(true); 
-    const [coins, getCoinsFunc]     = useState([]); 
-    const [USDAmt, USDAmtFunc]      = useState(0);
-    const [coinsAmt, coinsAmtFunc]  = useState(0);
-    const [coinsSym, coinsSymFunc]  = useState('');
-    const [USDCoins, USDCoinsFunc]  = useState(0);
 
-    useEffect(() => {
-        
-        const fetchConinsData = async () => {
-            
-            try {
-                
-                const res       = await fetch('https://api.coinpaprika.com/v1/tickers');
-                const coinsJson = await res.json();
-                const dfCoinSym = coinsJson[0]['symbol']; 
-                const dfCoinPrc = coinsJson[0].quotes.USD.price;
+    const [loading, loadingFunc]    = useState(true);
+    const [movies, getMoviesFunc]   = useState([]);
 
-                loadingFunc(false);
-                getCoinsFunc(coinsJson);
-                coinsAmtFunc(dfCoinPrc);
-                coinsSymFunc(dfCoinSym); 
+    const getMoviesFn = async () => {
 
-            } catch(error) {
+        try {
 
-                console.error(error);
-            }
-        } 
-        fetchConinsData();
+            const moviesFullData = await (
+                await fetch('https://yts.mx/api/v2/list_movies.json?minimum_rating=9&sort_by=year')
+            ).json();
+            const moviesData     = moviesFullData.data.movies;
 
-    }, [])
+            getMoviesFunc(moviesData);
+            loadingFunc(false);
 
+        } catch(error) {
 
-    const USDAmtFn = (e) => {
-
-        const input     = e.target;
-        const inputVal  = input.value.slice(0, 1) === '0'
-        ? input.value.slice(1)
-        : input.value;
-
-        inputVal !== ""
-        ? USDAmtFunc(inputVal)
-        : USDAmtFunc(0);
-    }
-
-    const coinsAmtFn = (e) => {
-
-        const select    = e.target;
-        const selectVal = select.value;
-        const selectOpt = select.options[select.selectedIndex];
-        const selectSym = selectOpt.dataset.symbol;
-        
-        coinsAmtFunc(selectVal);
-        coinsSymFunc(selectSym);
-    }
-    
-    useEffect(() => {
-        
-        if (USDAmt > 0 && coinsAmt > 0) {
-
-            const translate = USDAmt / coinsAmt;
-            USDCoinsFunc(translate);
-
-        } else {
-
-            USDCoinsFunc(0);
+            console.error(error);
         }
 
-    }, [USDAmt, coinsAmt])
+    }
+
+    useEffect(() => {
+
+        getMoviesFn();
+    }, []);
 
     return (
         <div>
-            <h1>The Coins!</h1>
             {
-                loading === true
-                ? (
-                    <LoadingEl />
-                ) : (
-                    <div
-                    style={{
-                        display : 'flex',
-                        flexDirection : 'column',
-                        gap : '10px',
-                        justifyContent : 'center',
-                        alignItems : 'flex-start'
-                    }}
-                    >
-                        <select
-                        onClick={coinsAmtFn}
-                        >
-                            {
-                                coins.map((coin, idx) => {
+                loading
+                ? <LoadingEl />
+                : (
+                    <div>
+                        {
+                            movies.map((item) => {
 
-                                    const coinName = coin.name;
-                                    const coinSymbol = coin.symbol;
-                                    const coinPrice = coin.quotes.USD.price;
+                                const itmId     = item.id;
+                                const imgSrc    = item.medium_cover_image;
+                                const title     = item.title;
+                                const rating    = item.rating;
+                                const lang      = item.language
+                                                ? item.language
+                                                : '?';
+                                const summary   = item.summary;
+                                const genres    = item.genres;
 
-                                    return (
-                                    <option 
-                                    key={idx}
-                                    value={coinPrice}
-                                    data-symbol={coinSymbol}>{coinName} {coinSymbol} {coinPrice} USD
-                                    </option>
-                                    );
-                                })
-                            }
-                        </select>
-                        <div>
-                            <input
-                            id="USDChanger" 
-                            type="number"
-                            placeholder="USD to Conins"
-                            value={USDAmt}
-                            onChange={USDAmtFn}
-                            />
-                            <label htmlFor="USDChanger"> USD</label>
-                        </div>
-                        <div>You can buy {USDCoins} {coinsSym} with {USDAmt} USD.</div>
+                                return (
+                                    <div key={itmId}>
+                                        <img src={imgSrc} />
+                                        <h1>
+                                            {title}
+                                            <span
+                                            style={{
+                                                marginLeft : '10px',
+                                                fontSize : '20px',
+                                            }}
+                                            >({lang}) (⭐{rating})</span>
+                                        </h1>
+                                        {
+                                            summary && <h2>{summary}</h2>
+                                        }
+                                        {
+                                            genres.length > 0 && (
+                                                <ul>
+                                                    {
+                                                        genres.map((genre) => 
+                                                            <li 
+                                                            key={genre}
+                                                            style={{
+                                                                fontWeight : 'bold'
+                                                            }}
+                                                            >{genre}</li>
+                                                        )
+                                                    }
+                                                </ul>
+                                            )
+                                        }
+                                    </div>
+                                );
+                            })
+                        }
                     </div>
                 )
             }
@@ -132,4 +96,4 @@ function App() {
     );
 }
 
-export default App;
+export default App; 

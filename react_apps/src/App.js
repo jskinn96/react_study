@@ -1,98 +1,28 @@
-import { useState, useEffect } from "react";
-
-const LoadingEl = () => {
-
-    return (<strong>Loding......</strong>);
-}
+/**
+ * g Switch => Routes
+ * g Route path="/" element={< Home / >}
+ * g BrowserRouter : 해당 컴포넌트로 감싸진 부분은 페이지 새로고침 없이 렌더링 한다.
+ * g Routes(Switch) : Route컴포넌트의 부모
+ * g Route : 특정 경로에 대한 컴포넌트를 지정, path = url, element = 렌더링할 컴포넌트
+ * g Link : movieStudy 파일 참고...새로고침 없이 리렌더링(클라이언트 사이드 이동) 하게 해주는 컴포넌트 
+*/
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+} from "react-router-dom";
+import Home from "./routes/homeStudy";
+import Detail from "./routes/detailStudy";
 
 function App() {
 
-    const [loading, loadingFunc]    = useState(true);
-    const [movies, getMoviesFunc]   = useState([]);
-
-    const getMoviesFn = async () => {
-
-        try {
-
-            const moviesFullData = await (
-                await fetch('https://yts.mx/api/v2/list_movies.json?minimum_rating=9&sort_by=year')
-            ).json();
-            const moviesData     = moviesFullData.data.movies;
-
-            getMoviesFunc(moviesData);
-            loadingFunc(false);
-
-        } catch(error) {
-
-            console.error(error);
-        }
-
-    }
-
-    useEffect(() => {
-
-        getMoviesFn();
-    }, []);
-
     return (
-        <div>
-            {
-                loading
-                ? <LoadingEl />
-                : (
-                    <div>
-                        {
-                            movies.map((item) => {
-
-                                const itmId     = item.id;
-                                const imgSrc    = item.medium_cover_image;
-                                const title     = item.title;
-                                const rating    = item.rating;
-                                const lang      = item.language
-                                                ? item.language
-                                                : '?';
-                                const summary   = item.summary;
-                                const genres    = item.genres;
-
-                                return (
-                                    <div key={itmId}>
-                                        <img src={imgSrc} />
-                                        <h1>
-                                            {title}
-                                            <span
-                                            style={{
-                                                marginLeft : '10px',
-                                                fontSize : '20px',
-                                            }}
-                                            >({lang}) (⭐{rating})</span>
-                                        </h1>
-                                        {
-                                            summary && <h2>{summary}</h2>
-                                        }
-                                        {
-                                            genres.length > 0 && (
-                                                <ul>
-                                                    {
-                                                        genres.map((genre) => 
-                                                            <li 
-                                                            key={genre}
-                                                            style={{
-                                                                fontWeight : 'bold'
-                                                            }}
-                                                            >{genre}</li>
-                                                        )
-                                                    }
-                                                </ul>
-                                            )
-                                        }
-                                    </div>
-                                );
-                            })
-                        }
-                    </div>
-                )
-            }
-        </div>
+    <Router>
+        <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/movie" element={<Detail />} />
+        </Routes>
+    </Router>
     );
 }
 

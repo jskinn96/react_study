@@ -13,7 +13,7 @@ function Movie({idx, imgSrc, title, rating, lang, summary, genres}) {
     >
         <img src={imgSrc} />
         <Link
-        to={`/movie/${idx}`}>
+        to={`${process.env.PUBLIC_URL}/movie/${idx}`}>
             <h1>
                 {title}
                 <span

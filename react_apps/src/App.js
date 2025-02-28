@@ -20,8 +20,8 @@ function App() {
     return (
     <Router>
         <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/movie/:idx" element={<Detail />} />
+            <Route path={`${process.env.PUBLIC_URL}/`} element={<Home />} />
+            <Route path={`${process.env.PUBLIC_URL}/movie/:idx`} element={<Detail />} />
         </Routes>
     </Router>
     );

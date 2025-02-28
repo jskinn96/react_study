@@ -16,11 +16,12 @@ import Detail from "./routes/detailStudy";
 
 function App() {
 
+    //g /movie/:idx : ":idx" < idx(키)값을 파라미터 값으로 가진다
     return (
     <Router>
         <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/movie" element={<Detail />} />
+            <Route path="/movie/:idx" element={<Detail />} />
         </Routes>
     </Router>
     );

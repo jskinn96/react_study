@@ -32,39 +32,43 @@ function Home() {
     }, []);
 
     return (
-        <div>
+        <div
+        style={{
+            display : "grid",
+            gridTemplateColumns : "1fr 1fr 1fr",
+            gap : "10px",
+            padding : "20px"
+        }}
+        >
             {
                 loading
                 ? <LoadingEl />
                 : (
-                    <div>
-                        {
-                            movies.map((item) => {
+                    movies.map((item) => {
 
-                                const itmId     = item.id;
-                                const imgSrc    = item.medium_cover_image;
-                                const title     = item.title;
-                                const rating    = item.rating;
-                                const lang      = item.language
-                                                ? item.language
-                                                : '?';
-                                const summary   = item.summary;
-                                const genres    = item.genres;
+                        const itmId     = item.id;
+                        const imgSrc    = item.medium_cover_image;
+                        const title     = item.title;
+                        const rating    = item.rating;
+                        const lang      = item.language
+                                        ? item.language
+                                        : '?';
+                        const summary   = item.summary;
+                        const genres    = item.genres;
 
-                                return (
-                                    <Movie 
-                                    key={itmId} 
-                                    imgSrc={imgSrc} 
-                                    title={title} 
-                                    rating={rating} 
-                                    lang={lang} 
-                                    summary={summary}
-                                    genres={genres}
-                                    />
-                                );
-                            })
-                        }
-                    </div>
+                        return (
+                            <Movie 
+                            key={itmId} 
+                            idx={itmId} 
+                            imgSrc={imgSrc} 
+                            title={title} 
+                            rating={rating} 
+                            lang={lang} 
+                            summary={summary}
+                            genres={genres}
+                            />
+                        );
+                    })    
                 )
             }
         </div>

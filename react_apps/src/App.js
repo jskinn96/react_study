@@ -13,6 +13,8 @@ import {
 } from "react-router-dom";
 import Home from "./routes/homeStudy";
 import Detail from "./routes/detailStudy";
+import RefEl from "./routes/useRef";
+import CallbackEl from "./routes/useCallback";
 
 function App() {
 
@@ -20,6 +22,8 @@ function App() {
     return (
     <Router>
         <Routes>
+            <Route path={`${process.env.PUBLIC_URL}/callback`} element={<CallbackEl />} />
+            <Route path={`${process.env.PUBLIC_URL}/ref`} element={<RefEl />} />
             <Route path={`${process.env.PUBLIC_URL}/`} element={<Home />} />
             <Route path={`${process.env.PUBLIC_URL}/movie/:idx`} element={<Detail />} />
         </Routes>

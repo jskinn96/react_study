@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 
+//g Link : movieStudy 파일 참고...새로고침 없이 리렌더링(클라이언트 사이드 이동) 하게 해주는 컴포넌트
 function Movie({idx, imgSrc, title, rating, lang, summary, genres}) {
 
     return (

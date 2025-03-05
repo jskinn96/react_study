@@ -59,13 +59,23 @@ const Box2 = styled.div`
   align-items: center;
 `;
 
-const ContentTxt = styled.span`
+//g 스타일 컴포넌츠에 사용될 타입 정의
+interface BoldType {
+  weight : string
+}
+
+const ContentTxt = styled.span<BoldType>`
   font-size: 30px;
-  font-weight: bold;
+  font-weight: ${(props) => props.weight};
   color: ${(props) => props.theme.textColor}
 `;
 
-function App() {
+//g 앱 컴포넌츠에 사용될 타입 정의
+interface txtType {
+  txt: string
+}
+
+function App({txt}: txtType) {
 
   return (
     <Wrapper>
@@ -74,7 +84,7 @@ function App() {
       </Box>
       <Box2>
         <Emoji>😘</Emoji>
-        <ContentTxt>Hello World!</ContentTxt>
+        <ContentTxt weight="bold">{txt}</ContentTxt>
       </Box2>
     </Wrapper>
   );

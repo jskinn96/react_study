@@ -4,7 +4,7 @@ import Home from "../screensStudy/Home";
 import About from "../screensStudy/About";
 import NotFound from "../screensStudy/NotFound";
 import ErrorComponent from "../screensStudy/ErrorComponent";
-import User from "../screensStudy/user";
+import User from "../screensStudy/User";
 import Follower from "../screensStudy/Follower";
 
 //g 메인 errorElement는 잘못된 패스로 갔을 때, 출력되는 컴포넌트

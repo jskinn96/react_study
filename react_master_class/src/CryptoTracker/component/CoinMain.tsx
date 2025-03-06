@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import LoadingEl from "./Loading";
 
-const Container = styled.div`
-    padding: 40px;
+const Container = styled.main`
+    padding: 20px;
     display: flex;
     justify-content: center;
 `;

@@ -1,13 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider } from "react-router-dom";
-import router from "./routerStudy/Router";
-
-//g 테마를 사용해서 darkMode, lightMode 컴포넌츠를 가져옴
+import { router } from './CryptoTracker/Router';
+import Reset from './common/resetCSS';
+import { ThemeProvider } from 'styled-components';
+import DarkMode from "./common/theme"; 
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
-  <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>
+  // <React.StrictMode>
+  //   <ThemeProvider theme={DarkMode}>
+  //     <Reset />
+  //     <RouterProvider router={router} />
+  //   </ThemeProvider>
+  // </React.StrictMode>
+  <div>
+    <ThemeProvider theme={DarkMode}>
+      <Reset />
+      <RouterProvider router={router} />
+    </ThemeProvider>
+  </div>
 );

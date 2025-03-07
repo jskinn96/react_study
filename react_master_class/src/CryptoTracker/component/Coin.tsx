@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useParams, Outlet, Link, useMatch } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import LoadingEl from "./Loading";
 import axios from "axios";
 //g 객체의 타입을 확인하는 함수
 import typeTranslateObjConsole from "../../common/typeTranslateConsole"
 import styled from "styled-components";
+import { coinInfoFetch, coinTickersFetch } from "../api/allCoins";
 
 //g useParams 사용 시, 기본 타입...키도 스트링인걸 알아야하고 값은 스트링이나 빈 값이 올 수 있다고 정의해야한다(없어도 자동으로 적용)
 interface CoinType {
@@ -161,41 +163,57 @@ const Tab = styled.li<{active: string}>`
 const Coin = () => {
 
     const { coinId }                = useParams<CoinType>();
-    const [loading, setLoading]     = useState<boolean>(true);
-    const [priceObj, setPriceObj]   = useState<IPriceData>();
-    const [infoObj, setInfoObj]     = useState<IInfoData>();
     //g useLocation으로 받는 값은 링크 클릭이 이루어졌을 때, 값을 받을 수 있으므로 주의...한번에 url로 값을 받아올 수 없다.
     const { state }                 = useLocation();
     //g 현재 파라미터 값이 맞는 지 확인 : useMatch
     const chartMatch                = useMatch("/:coinId/chart"); 
     const priceMatch                = useMatch("/:coinId/price"); 
     
-    useEffect(() => {
+    //g useQuery 사용 전
+    // const [loading, setLoading]     = useState<boolean>(true);
+    // const [priceObj, setPriceObj]   = useState<IPriceData>();
+    // const [infoObj, setInfoObj]     = useState<IInfoData>();
+    // useEffect(() => {
 
-        (async () => {
+    //     (async () => {
             
-            try {
+    //         try {
 
-                const [{data : priceData}, {data : infoData}] = await axios.all([
-                    axios.get(`https://api.coinpaprika.com/v1/tickers/${coinId}`),
-                    axios.get(`https://api.coinpaprika.com/v1/coins/${coinId}`),
-                ]);
+    //             const [{data : priceData}, {data : infoData}] = await axios.all([
+    //                 axios.get(`https://api.coinpaprika.com/v1/tickers/${coinId}`),
+    //                 axios.get(`https://api.coinpaprika.com/v1/coins/${coinId}`),
+    //             ]);
 
-                setPriceObj(priceData);
-                setInfoObj(infoData);
-                setLoading(false);
+    //             setPriceObj(priceData);
+    //             setInfoObj(infoData);
+    //             setLoading(false);
 
-                //g 타입 변환 함수
-                // typeTranslateObjConsole(priceData);
-                // typeTranslateObjConsole(infoData);
+    //             //g 타입 변환 함수
+    //             // typeTranslateObjConsole(priceData);
+    //             // typeTranslateObjConsole(infoData);
                 
-            } catch(error) {
+    //         } catch(error) {
     
-                console.error(error);
-            }
-        })()
+    //             console.error(error);
+    //         }
+    //     })()
 
-    }, [coinId]);
+    // }, [coinId]);
+
+    //g useQuery 사용 후
+    //g queryFn 사용 시, 실행한 함수를 넣는 게 아니라 실행할 함수 자체를 넣어야 하므로 () => 함수(test) 형태가 된다.
+    const { isLoading : infoLoading, data : infoObj } = useQuery<IInfoData>({
+        queryKey : [coinId, 'info'],
+        queryFn : () => coinInfoFetch(coinId),
+    });
+
+    const { isLoading : priceLoading, data : priceObj } = useQuery<IPriceData>({
+        queryKey : [coinId, 'price'],
+        queryFn : () => coinTickersFetch(coinId),
+    });
+
+    //g 둘 중 하나라도 true면 true
+    const loading = infoLoading || priceLoading;
 
     const coinName      = infoObj?.name;
     const coinRank      = infoObj?.rank;

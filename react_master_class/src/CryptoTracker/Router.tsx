@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import App from "./CoinApp";
 import Coin from "./component/Coin";
 import CoinMain from "./component/CoinMain";
-import Chart from "./component/Chart";
+import CoinChart from "./component/Chart";
 import Price from "./component/Price";
 
 export const router = createBrowserRouter([
@@ -20,7 +20,7 @@ export const router = createBrowserRouter([
                 children : [
                     {
                         path : "chart",
-                        element : <Chart />
+                        element : <CoinChart />
                     },
                     {
                         path : "price",

@@ -5,6 +5,7 @@ import LoadingEl from "./Loading";
 import axios from "axios";
 //g 객체의 타입을 확인하는 함수
 import typeTranslateObjConsole from "../../common/typeTranslateConsole"
+import { Helmet } from "react-helmet-async";
 import styled from "styled-components";
 import { coinInfoFetch, coinTickersFetch } from "../api/allCoins";
 
@@ -207,9 +208,13 @@ const Coin = () => {
         queryFn : () => coinInfoFetch(coinId),
     });
 
+    //g 주석한 부분은 5초 마다 데이터를 가져올 수 있게 구성한 부분
     const { isLoading : priceLoading, data : priceObj } = useQuery<IPriceData>({
         queryKey : [coinId, 'price'],
         queryFn : () => coinTickersFetch(coinId),
+        // refetchInterval : 5000,
+        // staleTime: 0,
+        // notifyOnChangeProps: "all", 
     });
 
     //g 둘 중 하나라도 true면 true
@@ -223,10 +228,13 @@ const Coin = () => {
     const coinTSupply   = priceObj?.total_supply;
     const coinMSupply   = priceObj?.max_supply;
     const coinPrice     = priceObj?.quotes.USD.price;
-    const roundPrice    = Math.round(coinPrice ?? 0);
+    const roundPrice    = coinPrice?.toFixed(2);
 
     return (
         <Container>
+            <Helmet>
+                <title>{coinName}</title>
+            </Helmet>
             <Title>
                 {
                     state?.name 
@@ -269,7 +277,7 @@ const Coin = () => {
                             </OverviewItem>
                             <OverviewItem>
                                 <span>PRICE</span>
-                                <span>{roundPrice}</span>
+                                <span>${roundPrice}</span>
                             </OverviewItem>
                         </OverviewWrap>
                     </InfoSection>
@@ -288,7 +296,7 @@ const Coin = () => {
                         </Tab>
                     </Tabs>
                 </nav>
-                <Outlet />
+                <Outlet context={coinId} />
             </InfoSection>
         </Container>
     );

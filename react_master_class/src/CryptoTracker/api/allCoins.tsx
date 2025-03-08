@@ -46,3 +46,18 @@ export const coinTickersFetch = async (coinId : string | undefined) => {
         console.error(error);
     }
 }
+
+export const coinChartFetch = async (coinId : string | undefined) => {
+
+    try {
+
+        const res   = await axios.get(`https://ohlcv-api.nomadcoders.workers.dev/?coinId=${coinId}`);
+        const data  = res.data;
+
+        return data;
+
+    } catch (error) {
+
+        console.error(error);
+    }
+}

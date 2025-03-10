@@ -8,6 +8,7 @@ import typeTranslateObjConsole from "../../common/typeTranslateConsole"
 import { Helmet } from "react-helmet-async";
 import styled from "styled-components";
 import { coinInfoFetch, coinTickersFetch } from "../api/allCoins";
+import { ArrowLeft } from "lucide-react";
 
 //g useParams 사용 시, 기본 타입...키도 스트링인걸 알아야하고 값은 스트링이나 빈 값이 올 수 있다고 정의해야한다(없어도 자동으로 적용)
 interface CoinType {
@@ -93,10 +94,40 @@ const Container = styled.main`
     gap: 20px;
 `;
 
+const TitleWrap = styled.div`
+    position: relative;
+    max-width: 500px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    .titleLink {
+        padding: 3px;
+        border-radius: 50%;
+        background-color: #f0f0f0;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s ease;
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        &:hover {
+            background-color: #e0e0e0;
+        }
+        .backArrow {
+            color: #333;
+        }
+    }
+`;
+
 const Title = styled.h1`
     font-size: 48px;
     padding: 10px 0;
-    color: ${props => props.theme.yellowColor} 
+    color: ${props => props.theme.yellowColor};
+    font-weight: bold;
 `;
 
 const InfoSection = styled.section`
@@ -222,7 +253,7 @@ const Coin = () => {
 
     const coinName      = infoObj?.name;
     const coinRank      = infoObj?.rank;
-    const coinSymbol    = infoObj?.symbol
+    const coinSymbol    = infoObj?.symbol;
     const coinOpSrc     = infoObj?.open_source ? 'Yes' : 'No';
     const coinDesc      = infoObj?.description ? infoObj?.description : 'No description.';
     const coinTSupply   = priceObj?.total_supply;
@@ -235,17 +266,25 @@ const Coin = () => {
             <Helmet>
                 <title>{coinName}</title>
             </Helmet>
-            <Title>
-                {
-                    state?.name 
-                    ? state.name
-                    : (
-                        loading
-                        ? ''
-                        : coinName
-                    )
-                }
-            </Title>
+            <TitleWrap>
+                <Link
+                to={"/"}
+                className="titleLink"
+                >
+                    <ArrowLeft className="backArrow" />
+                </Link>
+                <Title>
+                    {
+                        state?.name 
+                        ? state.name
+                        : (
+                            loading
+                            ? ''
+                            : coinName
+                        )
+                    }
+                </Title>
+            </TitleWrap>
             {
                 loading
                 ? <LoadingEl />

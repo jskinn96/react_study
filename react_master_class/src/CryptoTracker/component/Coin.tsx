@@ -4,85 +4,17 @@ import { useQuery } from "@tanstack/react-query";
 import LoadingEl from "./Loading";
 import axios from "axios";
 //g 객체의 타입을 확인하는 함수
-import typeTranslateObjConsole from "../../common/typeTranslateConsole"
+import typeTranslateObjConsole from "../../utils/typeTranslateConsole";
 import { Helmet } from "react-helmet-async";
 import styled from "styled-components";
-import { coinInfoFetch, coinTickersFetch } from "../api/allCoins";
+import { coinInfoFetch } from "../api/allCoins";
 import { ArrowLeft } from "lucide-react";
+import IInfo from "../types/coinInfo";
+import { toKMBT } from "../../utils/common";
 
 //g useParams 사용 시, 기본 타입...키도 스트링인걸 알아야하고 값은 스트링이나 빈 값이 올 수 있다고 정의해야한다(없어도 자동으로 적용)
 interface CoinType {
     [key: string]: string | undefined;
-}
-
-interface IPriceData {
-    id: string;
-    name: string;
-    symbol: string;
-    rank: number;
-    total_supply: number;
-    max_supply: number;
-    beta_value: number;
-    first_data_at: string;
-    last_updated: string;
-    quotes: {
-        USD: {
-            price: number;
-            volume_24h: number;
-            volume_24h_change_24h: number;
-            market_cap: number;
-            market_cap_change_24h: number;
-            percent_change_15m: number;
-            percent_change_30m: number;
-            percent_change_1h: number;
-            percent_change_6h: number;
-            percent_change_12h: number;
-            percent_change_24h: number;
-            percent_change_7d: number;
-            percent_change_30d: number;
-            percent_change_1y: number;
-            ath_price: number;
-            ath_date: string;
-            percent_from_price_ath: number;
-        };
-    };
-}
-
-interface IInfoData {
-    id: string;
-    name: string;
-    symbol: string;
-    rank: number;
-    is_new: boolean;
-    is_active: boolean;
-    type: string;
-    logo: string;
-    tags: [];
-    team: [];
-    description: string;
-    message: string;
-    open_source: boolean;
-    started_at: string;
-    development_status: string;
-    hardware_wallet: boolean;
-    proof_type: string;
-    org_structure: string;
-    hash_algorithm: string;
-    links: {
-        explorer: [];
-        facebook: [];
-        reddit: [];
-        source_code: [];
-        website: [];
-        youtube: [];
-    };
-    links_extended: [];
-    whitepaper: {
-        link: string;
-        thumbnail: string;
-    };
-    first_data_at: string;
-    last_data_at: string;
 }
 
 const Container = styled.main`
@@ -103,7 +35,7 @@ const TitleWrap = styled.div`
     .titleLink {
         padding: 3px;
         border-radius: 50%;
-        background-color: #f0f0f0;
+        background-color: rgba(0, 0, 0, 0.5);
         border: none;
         cursor: pointer;
         display: flex;
@@ -115,10 +47,10 @@ const TitleWrap = styled.div`
         top: 50%;
         transform: translateY(-50%);
         &:hover {
-            background-color: #e0e0e0;
+            background-color: rgb(0, 0, 0);
         }
         .backArrow {
-            color: #333;
+            color: #fff;
         }
     }
 `;
@@ -166,6 +98,22 @@ const OverviewItem = styled.div`
     }
 `;
 
+const DescWrap = styled.div`
+`;
+
+const DescText = styled.span`
+    line-height: 26px;
+    margin-right: 10px;
+`;
+
+const MVBtn = styled.button`
+    background: unset;
+    border: 0;
+    cursor: pointer;
+    color: ${props => props.theme.accentColor};
+    font-size: 16px;
+`;
+
 const Tabs = styled.ul`
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -189,6 +137,7 @@ const Tab = styled.li<{active: string}>`
     };
     a {
         display: block;
+        font-weight: bold;
     }
 `;
 
@@ -200,7 +149,8 @@ const Coin = () => {
     //g 현재 파라미터 값이 맞는 지 확인 : useMatch
     const chartMatch                = useMatch("/:coinId/chart"); 
     const priceMatch                = useMatch("/:coinId/price"); 
-    
+    const [isMV, setMV]             = useState(false);
+
     //g useQuery 사용 전
     // const [loading, setLoading]     = useState<boolean>(true);
     // const [priceObj, setPriceObj]   = useState<IPriceData>();
@@ -234,32 +184,55 @@ const Coin = () => {
 
     //g useQuery 사용 후
     //g queryFn 사용 시, 실행한 함수를 넣는 게 아니라 실행할 함수 자체를 넣어야 하므로 () => 함수(test) 형태가 된다.
-    const { isLoading : infoLoading, data : infoObj } = useQuery<IInfoData>({
+    //g 주석한 부분은 5초 마다 데이터를 가져올 수 있게 구성한 부분
+    const { isLoading : loading, data : infoObj } = useQuery<IInfo>({
         queryKey : [coinId, 'info'],
         queryFn : () => coinInfoFetch(coinId),
+        refetchInterval : 60000,
     });
-
-    //g 주석한 부분은 5초 마다 데이터를 가져올 수 있게 구성한 부분
-    const { isLoading : priceLoading, data : priceObj } = useQuery<IPriceData>({
-        queryKey : [coinId, 'price'],
-        queryFn : () => coinTickersFetch(coinId),
-        // refetchInterval : 5000,
-        // staleTime: 0,
-        // notifyOnChangeProps: "all", 
-    });
-
-    //g 둘 중 하나라도 true면 true
-    const loading = infoLoading || priceLoading;
-
+    
     const coinName      = infoObj?.name;
-    const coinRank      = infoObj?.rank;
+    const coinRank      = infoObj?.market_cap_rank;
     const coinSymbol    = infoObj?.symbol;
-    const coinOpSrc     = infoObj?.open_source ? 'Yes' : 'No';
-    const coinDesc      = infoObj?.description ? infoObj?.description : 'No description.';
-    const coinTSupply   = priceObj?.total_supply;
-    const coinMSupply   = priceObj?.max_supply;
-    const coinPrice     = priceObj?.quotes.USD.price;
-    const roundPrice    = coinPrice?.toFixed(2);
+    const coinMC        = infoObj?.market_data?.market_cap?.usd 
+                        ? toKMBT(infoObj.market_data.market_cap.usd) 
+                        : 'N/A';
+    const coinDesc      = infoObj?.description?.en ? infoObj?.description.en : 'No description.';
+    const coinTSupply   = infoObj?.market_data?.total_supply
+                        ? toKMBT(infoObj.market_data.total_supply)
+                        : 'N/A';
+    const coinMSupply   = infoObj?.market_data?.max_supply
+                        ? toKMBT(infoObj.market_data.max_supply)
+                        : 'N/A';
+    const coinPrice     = Number(infoObj?.market_data?.current_price?.usd);
+    const roundPrice    = toKMBT(coinPrice);
+
+    const SpDesc = coinDesc.split(' ');
+    let coinDescText, MVBtnEL;
+    if (SpDesc.length >= 50) {
+
+        
+        let MVBtnTxt;
+        if (isMV === false) {
+            
+            MVBtnTxt = '...more';
+
+            coinDescText = SpDesc.slice(0, 50).join(' ');
+
+        } else {
+
+            MVBtnTxt = 'close';
+
+            coinDescText = coinDesc;
+        }
+
+
+        MVBtnEL = <MVBtn onClick={() => setMV(!isMV)}>{MVBtnTxt}</MVBtn>;
+
+    } else {
+
+        coinDescText = coinDesc;
+    }
 
     return (
         <Container>
@@ -297,14 +270,17 @@ const Coin = () => {
                             </OverviewItem>
                             <OverviewItem>
                                 <span>SYMBOL</span>
-                                <span>${coinSymbol}</span>
+                                <span>{coinSymbol}</span>
                             </OverviewItem>
                             <OverviewItem>
-                                <span>OPEN SOURCE</span>
-                                <span>{coinOpSrc}</span>
+                                <span>MARKET CAP</span>
+                                <span>${coinMC}</span>
                             </OverviewItem>
                         </OverviewWrap>
-                        <div>{coinDesc}</div>
+                        <DescWrap>
+                            <DescText>{coinDescText}</DescText>
+                            {MVBtnEL}
+                        </DescWrap>
                         <OverviewWrap>
                             <OverviewItem>
                                 <span>TOTAL SUPPLY</span>
@@ -335,7 +311,7 @@ const Coin = () => {
                         </Tab>
                     </Tabs>
                 </nav>
-                <Outlet context={coinId} />
+                <Outlet context={{coinId, infoObj}} />
             </InfoSection>
         </Container>
     );

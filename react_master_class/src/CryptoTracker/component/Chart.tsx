@@ -2,40 +2,224 @@ import { useOutletContext } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { coinChartFetch } from "../api/allCoins";
 import Chart from "react-apexcharts";
-import typeTranslateObjConsole from "../../common/typeTranslateConsole";
+import { ApexOptions } from "apexcharts";
 import LoadingEl from "./Loading";
+import { useState } from "react";
+import { LineChart, CandlestickChart } from "lucide-react";
+import styled from "styled-components";
 
-interface Idata {   
-    time_open: number;
-    time_close: number;
-    open: string;
-    high: string;
-    low: string;
-    close: string;
-    volume: string;
-    market_cap: number;
-}
+const ToggleContainer = styled.div`
+    display: flex;
+    gap: 8px;
+    padding: 6px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+`;
+
+const ToggleButton = styled.button<{ active: string }>`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border: none;
+    background: ${({ active }) => (active === 'true' ? "#4CAF50" : "transparent")};
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+
+    &:hover {
+        background: ${({ active }) => (active === 'true' ? "#45a049" : "#3a3a3a")};
+    }
+
+    svg {
+        width: 24px;
+        height: 24px;
+        color: ${({ active }) => (active ? "#fff" : "#bbb")};
+        transition: color 0.3s ease-in-out;
+    }
+`;
+
+const ChartWrap = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+`;
+
+const ChartLine = styled.div`
+    overflow: hidden;
+    border-radius: 15px;
+    background-color: rgba(0, 0, 0, 0.5);
+`;
 
 const CoinChart = () => {
 
-    const coinId: string = useOutletContext();
-    const {isLoading, data : chartData} = useQuery<Idata[]>({
+    const { coinId } = useOutletContext<{ coinId: string }>();
+    const {isLoading, data : chartData} = useQuery<number[][]>({
         queryKey : [coinId, "chart"],
         queryFn : () => coinChartFetch(coinId)
     });
-
-    // typeTranslateObjConsole(chartData);
+    const [chartType, setChartType] = useState< "line" | "candlestick" >("line");
 
     const safeChartData = Array.isArray(chartData) ? chartData : [];
 
-    const closePriceData = safeChartData.map((el) => {
-        
-        const close = Number(el.close);
-        
-        return isNaN(close) ? 0 : close;
-    });
+    const handleToggle = (value: "line" | "candlestick" ) => {
+        setChartType(value);
+    };
+    
+    const timeCloseData: number[] = [];
 
-    const timeCloseData = safeChartData.map((el) => Number(el.time_close) * 1000);
+    let chartSD, chartOpt: ApexOptions;
+    if (chartType === 'line') {
+
+        const closePriceData: number[]  = [];
+    
+        safeChartData.forEach((el) => {
+    
+            timeCloseData.push(el[0]);
+            closePriceData.push(el[4]);
+        });
+
+        chartSD = [
+            {
+              name: "Price",
+              data: closePriceData,
+            },
+        ];
+
+        chartOpt = {
+            theme: {
+                mode: "dark",
+            },
+            chart: {
+                height: 300,
+                width: 500,
+                toolbar: {
+                    show: false,
+                },
+                background: "transparent",
+            },
+            grid: {
+                show: false 
+            },
+            stroke: {
+                curve: "smooth",
+                width: 4,
+            },
+            yaxis: {
+                show: false,
+            },
+            xaxis: {
+                type: "datetime",
+                categories: timeCloseData, 
+                axisBorder: {
+                    show: false
+                },
+                axisTicks: {
+                    show: false
+                },
+                labels: {
+                    show: false 
+                },
+            },
+            fill: {
+                type: "gradient",
+                gradient: {
+                    gradientToColors: ["#0be881"], 
+                    stops: [0, 100]
+                },
+            },
+            colors: ["#0fbcf9"],
+            tooltip: {
+                y: {
+                    formatter: (value: number) => `$${value.toFixed(2)}`,
+                },
+            },
+        }
+
+    } else {
+
+        interface ICandle {
+            x: Date;
+            y: number[] 
+        } 
+
+        const seriesData: ICandle[] = [];
+
+        safeChartData.forEach((el) => {
+    
+            timeCloseData.push(el[0]);
+
+            const tmpSD = {
+                x: new Date(el[0]),
+                y: el.slice(1)
+            }
+
+            seriesData.push(tmpSD);
+        });
+
+        chartSD = [
+            {
+              data: seriesData
+            }
+        ];
+
+        chartOpt = {
+            theme: {
+                mode: "dark",
+            },
+            chart: {
+                type: "candlestick",
+                height: 300,
+                width: 500,
+                toolbar: {
+                    show: false,
+                },
+                background: "transparent",
+            },
+            plotOptions: {
+                candlestick: {
+                    colors: {
+                        upward: "#26a69a", 
+                        downward: "#ef5350", 
+                    },
+                    wick: {
+                        useFillColor: true,
+                    },
+                },
+            },
+            stroke: {
+                width: 1,
+            },
+            grid: {
+                show: false 
+            },
+            yaxis: {
+                show: false,
+            },
+            xaxis: {
+                type: "datetime",
+                categories: timeCloseData, 
+                axisBorder: {
+                    show: false
+                },
+                axisTicks: {
+                    show: false
+                },
+                labels: {
+                    show: false 
+                },
+            },
+            fill: {
+                type: 'solid',
+                gradient: {}
+            },
+            tooltip: {
+                y: {
+                    formatter: (value: number) => `$${value.toFixed(2)}`,
+                },
+            },
+        }
+    }
 
     return (
         <div>
@@ -44,64 +228,23 @@ const CoinChart = () => {
                     <LoadingEl />
                 )
                 : (
-                    <Chart 
-                    type="line"
-                    series={[
-                        {
-                          name: "Price",
-                          data: closePriceData,
-                        },
-                    ]}
-                    options={{
-                        theme: {
-                            mode: "dark",
-                        },
-                        chart: {
-                            height: 300,
-                            width: 500,
-                            toolbar: {
-                                show: false,
-                            },
-                            background: "transparent",
-                        },
-                        grid: {
-                            show: false 
-                        },
-                        stroke: {
-                            curve: "smooth",
-                            width: 4,
-                        },
-                        yaxis: {
-                            show: false,
-                        },
-                        xaxis: {
-                            axisBorder: {
-                                show: false
-                            },
-                            axisTicks: {
-                                show: false
-                            },
-                            labels: {
-                                show: false 
-                            },
-                            type: "datetime",
-                            categories: timeCloseData, 
-                        },
-                        fill: {
-                            type: "gradient",
-                            gradient: {
-                                gradientToColors: ["#0be881"], 
-                                stops: [0, 100]
-                            },
-                        },
-                          colors: ["#0fbcf9"],
-                          tooltip: {
-                            y: {
-                                formatter: (value) => `$${value.toFixed(2)}`,
-                            },
-                        },
-                      }}
-                    />
+                    <ChartWrap>
+                        <ToggleContainer>
+                            <ToggleButton active={chartType === "line" ? 'true' : 'false'} onClick={() => handleToggle("line")}>
+                                <LineChart />
+                            </ToggleButton>
+                            <ToggleButton active={chartType === "candlestick" ? 'true' : 'false'} onClick={() => handleToggle("candlestick")}>
+                                <CandlestickChart />
+                            </ToggleButton>
+                        </ToggleContainer>
+                        <ChartLine>
+                            <Chart 
+                                type={chartType}
+                                series={chartSD}
+                                options={chartOpt}
+                            />
+                        </ChartLine>
+                    </ChartWrap>
                 )
             }
         </div>

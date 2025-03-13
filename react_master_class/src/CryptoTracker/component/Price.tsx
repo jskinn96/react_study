@@ -9,6 +9,13 @@ interface Iprice {
     "val"   : number,
 }
 
+type IChartIcon = {
+    //g 컴포넌트 또는 HTML 태그를 받을 수 있는 타입 
+    Icon: React.ElementType;
+    size: number; 
+    color: string;
+};
+
 const Wrap = styled.div`
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -39,6 +46,11 @@ const TextWrap = styled.div`
         }
     }
 `;
+
+//g React.FC<IChartIcon> 함수형 컴포넌트(FC)에 IChartIcon 타입을 지정
+const ChartIcon: React.FC<IChartIcon> = ({Icon, size, color}) => (
+    <Icon size={size} color={color} />
+); 
 
 const Price = () => {
 
@@ -86,20 +98,22 @@ const Price = () => {
                     
                     const title = el.title;
                     const value = el.val;
-                    
-                    let priceColor;
+
+                    let priceColor,priceIcon;
                     if (value >= 0) {
 
-                        priceColor = "#26a69a";
+                        priceColor  = "#26a69a";
+                        priceIcon   = TrendingUp;
 
                     } else {
                         
-                        priceColor = "#ef5350";
+                        priceColor  = "#ef5350"; 
+                        priceIcon   = TrendingDown;
                     }
 
                     return (
                     <Container key={i}>
-                        <TrendingUp size={64} color={priceColor} />
+                        <ChartIcon Icon={priceIcon} size={64} color={priceColor} />
                         <TextWrap color={priceColor}>
                             <span>{title}</span>
                             <span>{toKMBT(value)}%</span>

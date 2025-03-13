@@ -18,6 +18,8 @@ const CoinList = styled.ul`
     display: flex;
     flex-direction: column;
     gap: 20px;
+    max-width: 600px;
+    width: 100%;
 `;
 
 const Coin = styled.li`
@@ -25,32 +27,93 @@ const Coin = styled.li`
     color: #111;
     font-weight: bold;
     border-radius: 18px;
-    box-shadow: 5px 5px 10px rgba(255, 255, 255, .5);
+    box-shadow: 3px 3px 10px rgba(255, 255, 255, .5);
+    overflow: hidden;
     a {
-        display: flex;
+        display: grid;
+        grid-template-columns: 8% 44% 44%;
+        gap: 2%;
         align-items: center;
-        gap: 10px;
         padding: 20px;
-        transition: color .1s ease-in;
+        transition: background-color .1s ease-in;
         &:hover {
-            color: ${props => props.theme.accentColor}
+            background-color: ${props => props.theme.accentColor}
         }
     }
 `;
 
+const ListRank = styled.div`
+    font-size: 20px;
+`;
+
+const ListTitle = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 26px;
+`;
+
 const CoinImg = styled.img`
-    width: 25px;
-    height: 25px;
+    width: 35px;
+    height: 35px;
+`;
+
+const ListPriceWrap = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`;
+
+const ListPrice = styled.span`
+`;
+
+const ListPcWrap = styled.div`
+    display: flex;
+    flex-direction: column;
+    line-height: 26px;
+    align-items: flex-end;
+`;
+
+const ListPC = styled.span`
+    font-size: 12px;
+`;
+
+const ListPCP = styled.span<{chgp: number}>`
+    background-color: ${
+        props => props.chgp > 0 ? '#92D1C3' : '#F7A8A8'
+    };
+    border-radius: 8px;
+    padding: 0px 5px;
+    width: fit-content;
 `;
 
 interface ICoin {
-    id          : string,
-    name        : string,
-    symbol      : string,
-    rank        : number,
-    is_new      : boolean,
-    is_active   : boolean,
-    type        : string,
+    id: string;
+    symbol: string;
+    name: string;
+    image: string;
+    current_price: number;
+    market_cap: number;
+    market_cap_rank: number;
+    fully_diluted_valuation: number;
+    total_volume: number;
+    high_24h: number;
+    low_24h: number;
+    price_change_24h: number;
+    price_change_percentage_24h: number;
+    market_cap_change_24h: number;
+    market_cap_change_percentage_24h: number;
+    circulating_supply: number;
+    total_supply: number;
+    max_supply: number;
+    ath: number;
+    ath_change_percentage: number;
+    ath_date: string;
+    atl: number;
+    atl_change_percentage: number;
+    atl_date: string;
+    roi: null | number;
+    last_updated: string;
 }
 
 const CoinMain = () => {
@@ -95,11 +158,11 @@ const CoinMain = () => {
      * g notifyOnChangeProps : 데이터의 작은 변화를 감지한다.
      * g refetchOnReconnect : 네트워크 연결 시 다시 데이터를 가져온다.
     */
-    const {data, isLoading} = useQuery<ICoin[]>({
+    const {data : coinData, isLoading} = useQuery<ICoin[]>({
         queryKey : ["allCoins"], 
         queryFn : allCoinsFetch,
+        refetchInterval : 10000,
     });
-    const coinData = data?.slice(0, 100);
 
     /**
      * g Link state를 통해서 값을 보내줄 수도 있다. v5와 사용 방식이 다르다.
@@ -121,7 +184,11 @@ const CoinMain = () => {
                             
                             const coinId    = el.id;
                             const coinName  = el.name;
-                            const coinSym   = el.symbol;
+                            const coinRank  = el.market_cap_rank;
+                            const coinImg   = el.image;
+                            const coinPrice = parseFloat(el.current_price.toFixed(3));
+                            const coinPC    = parseFloat(el.price_change_24h.toFixed(3));
+                            const coinPCP   = parseFloat(el.price_change_percentage_24h.toFixed(3));
                             
                             return (
                                 <Coin key={coinId}>
@@ -130,8 +197,18 @@ const CoinMain = () => {
                                     state={{
                                         name : coinName
                                     }}>
-                                        <CoinImg src={`https://cryptoicon-api.pages.dev/icons/128/color/${coinSym.toLowerCase()}.png`} />
-                                        {coinName} &rarr;
+                                        <ListRank>{coinRank}</ListRank>
+                                        <ListTitle>
+                                            <CoinImg src={coinImg} />
+                                            {coinName}
+                                        </ListTitle>
+                                        <ListPriceWrap>
+                                            <ListPrice>${coinPrice}</ListPrice>
+                                            <ListPcWrap>
+                                                <ListPC>{coinPC}$</ListPC>
+                                                <ListPCP chgp={coinPCP} >{coinPCP}%</ListPCP>
+                                            </ListPcWrap>
+                                        </ListPriceWrap>
                                     </Link>
                                 </Coin>
                             );

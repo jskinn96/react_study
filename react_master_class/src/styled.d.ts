@@ -7,9 +7,14 @@ declare module 'styled-components' {
     //     color       : string;
     //     btnColor    : string;
     // }
-    export interface DefaultTheme {
-        bgColor     : string;
-        txtColor    : string;
-        accentColor : string;
-    }
+    // export interface DefaultTheme {
+    //     bgColor     : string;
+    //     txtColor    : string;
+    //     accentColor : string;
+    //     bgDarkColor : string;
+    //     bgHeader    : string;
+    //     bgWhite     : string;
+    //     bgDark      : string;
+    // }
+    export type DefaultTheme = Record<string, string>;
 }

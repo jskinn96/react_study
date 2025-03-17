@@ -7,12 +7,14 @@ import LoadingEl from "./Loading";
 import { useState } from "react";
 import { LineChart, CandlestickChart } from "lucide-react";
 import styled from "styled-components";
+import { useRecoilValue } from "recoil";
+import { themeAtom } from "../recoil/index";
 
 const ToggleContainer = styled.div`
     display: flex;
     gap: 8px;
     padding: 6px;
-    background: rgba(0, 0, 0, 0.5);
+    background: ${props => props.theme.bgDark};
     border-radius: 15px;
 `;
 
@@ -34,7 +36,7 @@ const ToggleButton = styled.button<{ active: string }>`
     svg {
         width: 24px;
         height: 24px;
-        color: ${({ active }) => (active ? "#fff" : "#bbb")};
+        color: ${({ active }) => (active === 'true' ? "#fff" : "#bbb")};
         transition: color 0.3s ease-in-out;
     }
 `;
@@ -48,7 +50,7 @@ const ChartWrap = styled.div`
 const ChartLine = styled.div`
     overflow: hidden;
     border-radius: 15px;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: ${props => props.theme.bgDark};
 `;
 
 const CoinChart = () => {
@@ -59,6 +61,7 @@ const CoinChart = () => {
         queryFn : () => coinChartFetch(coinId)
     });
     const [chartType, setChartType] = useState< "line" | "candlestick" >("line");
+    const themeSelect = useRecoilValue(themeAtom);
 
     const safeChartData = Array.isArray(chartData) ? chartData : [];
 
@@ -88,7 +91,7 @@ const CoinChart = () => {
 
         chartOpt = {
             theme: {
-                mode: "dark",
+                mode: themeSelect,
             },
             chart: {
                 height: 300,
@@ -165,7 +168,7 @@ const CoinChart = () => {
 
         chartOpt = {
             theme: {
-                mode: "dark",
+                mode: themeSelect,
             },
             chart: {
                 type: "candlestick",

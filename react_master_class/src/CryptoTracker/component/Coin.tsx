@@ -35,7 +35,7 @@ const TitleWrap = styled.div`
     .titleLink {
         padding: 3px;
         border-radius: 50%;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: ${props => props.theme.bgDark};
         border: none;
         cursor: pointer;
         display: flex;
@@ -47,10 +47,10 @@ const TitleWrap = styled.div`
         top: 50%;
         transform: translateY(-50%);
         &:hover {
-            background-color: rgb(0, 0, 0);
+            background-color: ${props => props.theme.accentColor};
         }
         .backArrow {
-            color: #fff;
+            color: ${props => props.theme.txtColor};
         }
     }
 `;
@@ -74,7 +74,7 @@ const InfoSection = styled.section`
 const OverviewWrap = styled.div`
     display: flex;
     justify-content: space-between;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: ${props => props.theme.bgDark};
     border-radius: 15px;
     padding: 10px 20px;
     position: relative;
@@ -127,7 +127,7 @@ const Tab = styled.li<{active: string}>`
     text-transform: uppercase;
     font-size: 12px;
     font-weight: 400;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: ${props => props.theme.bgDark};
     padding: 7px 0px;
     border-radius: 10px;
     color: ${

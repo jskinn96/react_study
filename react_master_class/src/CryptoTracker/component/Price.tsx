@@ -23,7 +23,7 @@ const Wrap = styled.div`
 `;
 
 const Container = styled.div`
-    background: rgba(0, 0, 0, 0.5);
+    background: ${props => props.theme.bgDark};
     border-radius: 15px;
     padding: 10px 20px;
     text-align: right;

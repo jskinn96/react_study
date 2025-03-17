@@ -23,7 +23,7 @@ const CoinList = styled.ul`
 `;
 
 const Coin = styled.li`
-    background-color: #fff;
+    background-color: ${props => props.theme.bgWhite};
     color: #111;
     font-weight: bold;
     border-radius: 18px;
@@ -186,8 +186,8 @@ const CoinMain = () => {
                             const coinName  = el.name;
                             const coinRank  = el.market_cap_rank;
                             const coinImg   = el.image;
-                            const coinPrice = parseFloat(el.current_price.toFixed(3));
-                            const coinPC    = parseFloat(el.price_change_24h.toFixed(3));
+                            const coinPrice = parseFloat(el.current_price.toFixed(3)).toLocaleString();
+                            const coinPC    = parseFloat(el.price_change_24h.toFixed(3)).toLocaleString();
                             const coinPCP   = parseFloat(el.price_change_percentage_24h.toFixed(3));
                             
                             return (

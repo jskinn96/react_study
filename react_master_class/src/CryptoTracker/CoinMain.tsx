@@ -2,16 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 //g 라우터를 연결시키기 위해 필요
 import { RouterProvider } from "react-router-dom";
-import { router } from './CryptoTracker/Router';
+import { router } from './Router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 //g 리액트 쿼리로 관리 중인 데이터 캐시를 확인할 수 있다.
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 //g recoil 상태를 연결하기 위해 필요 
 import { RecoilRoot } from 'recoil';
-import { ThemeProvider } from 'styled-components';
-import { DarkMode } from './common/theme';
-import App from './App';
-import Reset from './common/resetCSS';
 
 /**
 * g QueryClient 기본 설정 추가
@@ -31,12 +27,16 @@ const queryClient = new QueryClient();
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
-  <React.StrictMode>
-    <RecoilRoot>
-      <ThemeProvider theme={DarkMode}>
-        <Reset />
-        <App />
-      </ThemeProvider>
-    </RecoilRoot>
-  </React.StrictMode>
+  // <React.StrictMode>
+  //   <ThemeProvider theme={DarkMode}>
+  //     <Reset />
+  //     <RouterProvider router={router} />
+  //   </ThemeProvider>
+  // </React.StrictMode>
+  <RecoilRoot>
+    <QueryClientProvider client={queryClient}> 
+      <RouterProvider router={router} />
+      <ReactQueryDevtools />
+    </QueryClientProvider>
+  </RecoilRoot>
 );

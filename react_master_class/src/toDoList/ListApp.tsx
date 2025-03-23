@@ -1,18 +1,27 @@
 import { useRecoilValue } from "recoil";
 import CreateToDo from "./component/createToDo";
 import ToDo from "./component/toDo";
-import { ToDoAtom } from "./Recoil";
+import { ToDoSelector, ToDoCatAtom, ToDoCatEnumLabel } from "./Recoil";
 
 function List() {
 
-    const toDos = useRecoilValue(ToDoAtom);    
+    const toDos     = useRecoilValue(ToDoSelector);
+    const catIdx    = useRecoilValue(ToDoCatAtom);
+    const cat       = ToDoCatEnumLabel[catIdx];        
 
     return (
-        <div>
+        <div
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px"
+            }}
+        >
             <h1>To Dos</h1>
-            <hr />
+            <hr style={{width: "100%"}} />
             <CreateToDo />
-            <hr />
+            <hr style={{width: "100%"}} />
+            <h1>{cat}</h1>
             <ul
                 style={{
                     display: "flex",
@@ -24,6 +33,7 @@ function List() {
                     toDos.map(arr => <ToDo key={arr.date} {...arr} />)
                 }
             </ul>
+            <hr style={{width: "100%"}} />
         </div>
     );
 }

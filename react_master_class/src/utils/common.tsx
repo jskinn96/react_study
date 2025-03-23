@@ -1,4 +1,4 @@
-export const toKMBT = (val : number) => {
+export const toKMBT = (val: number): string => {
         
     if (val >= 1_000_000_000_000) {
 
@@ -24,4 +24,17 @@ export const toKMBT = (val : number) => {
         
         return parseFloat(val.toFixed(2)).toString();
     }
+}
+
+export const setTimestamp = (date: number): string => {
+
+    const dateStp = new Date(date);
+
+    const year  = dateStp.getFullYear();
+    const month = String(dateStp.getMonth() + 1).padStart(2, '0');
+    const day   = String(dateStp.getDate()).padStart(2, '0');
+    const hours = String(dateStp.getHours()).padEnd(2, '0');
+    const min   = String(dateStp.getMinutes()).padEnd(2, '0');
+
+    return `${year}.${month}.${day} ${hours}:${min}`;
 }

@@ -7,11 +7,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 //g 리액트 쿼리로 관리 중인 데이터 캐시를 확인할 수 있다.
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 //g recoil 상태를 연결하기 위해 필요 
-import { RecoilRoot } from 'recoil';
+import { RecoilRoot, useRecoilValue } from 'recoil';
 import { ThemeProvider } from 'styled-components';
-import { DarkMode } from './common/theme';
+import { DarkMode, LightMode } from './styles/theme';
 import App from './App';
-import Reset from './common/resetCSS';
+import Reset from './styles/resetCSS';
+import { ThemeAtom } from './recoil';
 
 /**
 * g QueryClient 기본 설정 추가
@@ -27,16 +28,27 @@ const queryClient = new QueryClient({
   },
 });
 **/
-const queryClient = new QueryClient();
+// const queryClient = new QueryClient();
+
+const ThemedEl = () => { 
+  
+  const ThemeMode = useRecoilValue(ThemeAtom) === "dark" 
+                  ? DarkMode
+                  : LightMode;
+
+  return (
+    <ThemeProvider theme={ThemeMode}>
+      <Reset />
+      <App />
+    </ThemeProvider>
+  );
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
-  <React.StrictMode>
+  <>
     <RecoilRoot>
-      <ThemeProvider theme={DarkMode}>
-        <Reset />
-        <App />
-      </ThemeProvider>
+      <ThemedEl />
     </RecoilRoot>
-  </React.StrictMode>
+  </>
 );

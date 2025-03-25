@@ -1,5 +1,5 @@
 import { useRecoilState } from "recoil";
-import { minutesAtom, minutesSelector } from "./recoilStudy/recoil";
+import { minutesAtom, minutesSelector } from "../recoil"; 
 
 function App() {
 

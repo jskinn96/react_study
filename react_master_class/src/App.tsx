@@ -1,129 +1,158 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion, useMotionValue, useScroll, useTransform } from "framer-motion";
 import styled from "styled-components";
-import RainText from "./framerStudy/rainKorean";
+import { useEffect, useRef, useState } from "react";
+import { relative } from "path";
 
 const Wrap = styled.div`
   width: 100vw;
   height: 100vh;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   background:linear-gradient(135deg,#e09,#d0e);
+  overflow: hidden;
+`;
+
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  width: 50vw;
+  gap: 20px;
 `;
 
 const Box = styled(motion.div)`
-  width: 200px;
-  height: 200px;
-  background-color: white;
-  border-radius: 40px;
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+  height: 300px;
+  background-color: rgba(255,255,255,.5);
+  border-radius: 10px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
-const myVars = {
-  start: { scale: 0 },
-  end: { scale: 1, rotateZ: 360, transition: { type: "spring", delay: 0.5 } }
-};
-
-const Test1 = () => {
-
-  return (
-    <Box
-      variants={myVars}
-      initial="start"
-      animate="end"
-    />
-  );
-}
-
-const Box2 = styled(motion.div)`
-  width: 200px;
-  height: 200px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 40px;
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+const Btn = styled(motion.button)`
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  color: blue;
+  cursor: pointer;
 `;
 
 const Circle = styled(motion.div)`
+  width: 100px;
+  height: 100px;
   background-color: white;
-  width: 70px;
-  height: 70px;
-  border-radius: 100%;
-  place-self: center;
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+  border-radius: 50%;
 `;
 
-const test2box = {
-  start: {
-    opacity: 0,
-    scale: 0.5,
-  },
-  end: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      type: "spring",
-      duration: 0.5,
-      bounce: 0.5,
-      delay: 0.5,
-      delayChildren: 0.75,
-      staggerChildren: 0.2,
-    }
-  }
+const Overlay = styled(motion.div)`
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;   
+`;
+
+
+const BtnVariants = {
+  start: (isClicked: boolean) => ({
+    scale: !isClicked ? 1 : 1.5,
+    color: !isClicked ? "blue" : "red",
+  }),
 }
 
-const test2circle = {
-  start: {
-    opacity: 0,
-    y: 10,
-  },
-  end: {
-    opacity: 1,
-    y: 0,
-  }
-}
-
-const Test2 = () => {
-
-  return (
-    <Box2 variants={test2box} initial="start" animate="end">
-      <Circle variants={test2circle} />
-      <Circle variants={test2circle} />
-      <Circle variants={test2circle} />
-      <Circle variants={test2circle} />
-    </Box2>
-  );
-}
-
-const test3box = {
-  click: {
-    scale: 1,
-    borderRadius: "100px"
-  },
-  hover: {
-    scale: 1.5,
-    rotateZ: 360
-  }
-}
-
-const Test3 = () => {
-
-  return (
-    <Box
-      drag 
-      variants={test3box}
-      whileHover="hover"
-      whileTap="click"
-    />
-  );
-}
+const overlay = {
+  hidden: { backgroundColor: "rgba(0, 0, 0, 0)" },
+  visible: { backgroundColor: "rgba(0, 0, 0, 0.5)" },
+  exit: (id: string | null) => ({
+    backgroundColor: "rgba(0, 0, 0, 0)",
+    transformOrigin:
+      id === "1" ? "bottom right" :
+        id === "2" ? "bottom left" :
+          id === "3" ? "top right" :
+            id === "4" ? "top left" : "",
+  }),
+};
 
 function App() {
 
+  const [isClicked, setClicked] = useState(false);
+  const [id, setId] = useState<string | null>(null);
+
   return (
     <Wrap>
-      <Test3 />
+      <Grid>
+        {["1", "2", "3", "4"].map((el) => {
+
+          let tranfromSetting;
+          switch (el) {
+            case "1": tranfromSetting = "bottom right"; break;
+            case "2": tranfromSetting = "bottom left"; break;
+            case "3": tranfromSetting = "top right"; break;
+            case "4": tranfromSetting = "top left"; break;
+          }
+
+          return (
+            <Box
+              key={el}
+              whileHover={{
+                scale: 1.1
+              }}
+              style={{
+                transformOrigin: tranfromSetting
+              }}
+              onClick={() => setId(el)}
+              layoutId={el}
+            >
+              {
+                (el === "2" && !isClicked) || (el === "3" && isClicked)
+                  ? <Circle
+                    layoutId="circle"
+                  />
+                  : null
+              }
+            </Box>
+          );
+        })}
+      </Grid>
+      <AnimatePresence
+        custom={isClicked}
+      >
+        <div
+          style={{
+            marginTop: "40px"
+          }}
+        >
+          <Btn
+            custom={isClicked}
+            variants={BtnVariants}
+            initial="start"
+            animate="start"
+            transition={{
+              delay: .2
+            }}
+            onClick={() => setClicked(val => !val)}
+          >Switch</Btn>
+        </div>
+      </AnimatePresence>
+      <AnimatePresence
+        custom={id}
+      >
+        {id ? (
+          <Overlay
+            variants={overlay}
+            onClick={() => setId(null)}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            custom={id}
+          >
+            <Box layoutId={id} style={{ width: 400, height: 300, backgroundColor: "#fff" }} />
+          </Overlay>
+        ) : null}
+      </AnimatePresence>
     </Wrap>
   );
 }

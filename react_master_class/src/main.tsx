@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 //g 라우터를 연결시키기 위해 필요
 import { RouterProvider } from "react-router-dom";
-import { router } from './CryptoTracker/Router';
+import Router from './nomflix/Routes/Router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 //g 리액트 쿼리로 관리 중인 데이터 캐시를 확인할 수 있다.
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -13,6 +13,7 @@ import { DarkMode, LightMode } from './styles/theme';
 import App from './App';
 import Reset from './styles/resetCSS';
 import { ThemeAtom } from './recoil';
+import { theme } from './nomflix/Theme/Theme';
 
 /**
 * g QueryClient 기본 설정 추가
@@ -28,19 +29,21 @@ const queryClient = new QueryClient({
   },
 });
 **/
-// const queryClient = new QueryClient();
+const queryClient = new QueryClient();
 
-const ThemedEl = () => { 
-  
-  const ThemeMode = useRecoilValue(ThemeAtom) === "dark" 
-                  ? DarkMode
-                  : LightMode;
+const ThemedEl = () => {
+
+  // const ThemeMode = useRecoilValue(ThemeAtom) === "dark" 
+  //                 ? DarkMode
+  //                 : LightMode;
 
   return (
-    <ThemeProvider theme={ThemeMode}>
-      <Reset />
-      <App />
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <Reset />
+        <RouterProvider router={Router} />
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

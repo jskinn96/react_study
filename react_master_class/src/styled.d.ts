@@ -16,5 +16,17 @@ declare module 'styled-components' {
     //     bgWhite     : string;
     //     bgDark      : string;
     // }
+    export interface DefaultTheme {
+        red: string;
+        black: {
+          veryDark: string;
+          darker: string;
+          lighter: string;
+        };
+        white: {
+          darker: string;
+          lighter: string;
+        };
+    }
     export type DefaultTheme = Record<string, string>;
 }

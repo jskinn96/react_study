@@ -23,36 +23,37 @@ function TrelloApp() {
 
     if (destination?.droppableId === source.droppableId) {
 
-        setToDos(allBoards => {
+      setToDos(allBoards => {
 
-            const tmp = {...allBoards};
+        const tmp = { ...allBoards };
 
-            const copied = [...allBoards[source.droppableId]];
-            const [moved] = copied.splice(source.index, 1);
-            
-            copied.splice(destination.index, 0, moved);
+        const copied = [...allBoards[source.droppableId]];
+        const [moved] = copied.splice(source.index, 1);
 
-            tmp[source.droppableId] = copied;
-            
-            return tmp;
-        });
+        copied.splice(destination.index, 0, moved);
+
+        tmp[source.droppableId] = copied;
+
+        return tmp;
+      });
+      
     } else {
-        
-        setToDos(allBoards => {
 
-            const tmp = {...allBoards};
-    
-            const current = [...allBoards[source.droppableId]];
-            const target  = [...allBoards[destination.droppableId]];
-    
-            const [moved] = current.splice(source.index, 1);
-            target.splice(destination.index, 0, moved);
-    
-            tmp[source.droppableId] = current;
-            tmp[destination.droppableId] = target;
-            
-            return tmp;
-        });
+      setToDos(allBoards => {
+
+        const tmp = { ...allBoards };
+
+        const current = [...allBoards[source.droppableId]];
+        const target = [...allBoards[destination.droppableId]];
+
+        const [moved] = current.splice(source.index, 1);
+        target.splice(destination.index, 0, moved);
+
+        tmp[source.droppableId] = current;
+        tmp[destination.droppableId] = target;
+
+        return tmp;
+      });
     }
   };
 
@@ -61,7 +62,7 @@ function TrelloApp() {
       <Wrap>
         {
           Object.keys(toDos).map(type => (
-            <Board 
+            <Board
               type={type}
               toDos={toDos[type]}
               key={type}

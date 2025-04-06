@@ -41,8 +41,8 @@ const Reset = createGlobalStyle`
     body {
         line-height: 1;
         font-family: 'Source Sans Pro', sans-serif;
-        background-color: ${props => props.theme.bgColor};
-        color: ${props => props.theme.txtColor};
+        background-color: ${props => props.theme.black.veryDark};
+        color: ${props => props.theme.white.darker};
     }
 
     menu, ol, ul {

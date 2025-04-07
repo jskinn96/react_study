@@ -43,6 +43,7 @@ const Reset = createGlobalStyle`
         font-family: 'Source Sans Pro', sans-serif;
         background-color: ${props => props.theme.black.veryDark};
         color: ${props => props.theme.white.darker};
+        overflow-x: hidden;
     }
 
     menu, ol, ul {

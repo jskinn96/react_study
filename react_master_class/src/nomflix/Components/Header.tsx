@@ -12,7 +12,8 @@ const Nav = styled(motion.nav)`
     top: 0;
     font-size: 14px;
     padding: 20px 60px;
-    color: white; 
+    color: white;
+    background-image: linear-gradient(180deg, rgba(0, 0, 0, .7) 10%, transparent); 
 `;
 
 const Col = styled.div`
@@ -80,7 +81,7 @@ const Input = styled(motion.input)`
     z-index: -1;
     color: white;
     font-size: 16px;
-    background-color: transparent;
+    background-color: ${props => props.theme.black.veryDark};
     border: 1px solid ${(props) => props.theme.white.lighter};
 `;
 
@@ -98,7 +99,7 @@ const logoVariants = {
 
 const navVariants = {
     top: {
-        backgroundImage: "linear-gradient(180deg, rgba(0, 0, 0, .7) 10%, transparent)",
+        backgroundColor: "rgba(0, 0, 0, 0)",
     },
     scroll: {
         backgroundColor: "rgba(0, 0, 0, 1)",
@@ -139,26 +140,27 @@ const Header = () => {
 
     useEffect(() => {
 
-        const handleClickOutside = (event: MouseEvent) => {
+        const handleClickOutside = (e: MouseEvent) => {
 
-            if (searchRef.current && !searchRef.current.contains(event.target as Node)) setSearchOpen(false);
+            if (searchRef.current && !searchRef.current.contains(e.target as Node)) setSearchOpen(false);
         };
 
-        document.addEventListener("mousedown", () => handleClickOutside);
+        document.addEventListener("mousedown", handleClickOutside);
 
         return () => {
-            document.addEventListener("mousedown", () => handleClickOutside);
+            document.addEventListener("mousedown", handleClickOutside);
         };
     }, []);
 
     useEffect(() => {
 
-        scrollY.on("change", (y) => {
-
+        const unsubscribe = scrollY.on("change", (y) => {
+            
             if (y > 80) navAnimation.start("scroll");
             else navAnimation.start("top");
         });
 
+        return () => unsubscribe();
     }, [scrollY, navAnimation]);
 
     return (

@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { getMovies, IGetMovies, TGetMoviesResults } from "../Api/MovieApi";
+import { getMovies, IGetMovies } from "../Api/MovieApi";
 import styled from "styled-components";
 import { makeImagePath } from "../Utils/Utils";
-import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const Wrapper = styled.div`
     background: black;
@@ -55,22 +56,82 @@ const Row = styled(motion.div)`
     display: flex;
     position: absolute;
     width: calc(100% + 400px);
-    overflow: hidden;
     left: -200px;
 `;
 
 const Box = styled(motion.div)`
     width: 16.66666667%;
     padding: 0 .2vw;
+    &:nth-of-type(2) .SlideCont {transform-origin: center left;}
+    &:nth-of-type(7) .SlideCont {transform-origin: center right;}
 `;
 
-const BoxCont = styled.div<{ $bgPhoto: string }>`
+const BoxCont = styled(motion.div) <{ $bgPhoto: string }>`
     border-radius: 4px;
     font-size: 66px;
     padding: 28.125% 0;
     background-image: url(${(props) => props.$bgPhoto});
     background-size: cover;
     background-position: center center;
+    cursor: pointer;
+`;
+
+const Info = styled(motion.div)`
+    padding: 10px;
+    background-color: ${({ theme }) => theme.black.lighter};
+    opacity: 0;
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    h4 {
+        text-align: center;
+        font-size: 18px;
+    }
+`;
+
+const Overlay = styled(motion.div)`
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .5);
+    opacity: 0;
+`;
+
+const BigMovie = styled(motion.div)`
+    position: absolute;
+    width: 40vw;
+    height: 80vh;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    border-radius: 15px;
+    overflow: hidden;
+    background-color: ${(props) => props.theme.black.lighter};
+`;
+
+const BigCover = styled.div`
+    width: 100%;
+    background-size: cover;
+    background-position: center center;
+    height: 400px;
+`;
+
+const BigTitle = styled.h3`
+    color: ${(props) => props.theme.white.lighter};
+    padding: 20px;
+    font-size: 36px;
+    font-weight: bold;
+    position: relative;
+    top: -80px;
+`;
+
+const BigOverview = styled.p`
+    padding: 20px;
+    position: relative;
+    top: -80px;
+    color: ${(props) => props.theme.white.lighter};
+    line-height: normal;
 `;
 
 const rowVariants = {
@@ -79,6 +140,31 @@ const rowVariants = {
     exit: (custom: number) => ({ x: -custom }),
 };
 
+const BoxContVariants = {
+    normal: {
+        scale: 1,
+    },
+    hover: {
+        scale: 1.3,
+        y: -60,
+        transition: {
+            delay: .5,
+            duration: .1,
+            type: "tween"
+        }
+    }
+}
+
+const infoVariants = {
+    hover: {
+        opacity: 1,
+        transition: {
+            delay: 0.5,
+            duaration: 0.1,
+            type: "tween",
+        },
+    },
+};
 
 const Home = () => {
 
@@ -88,12 +174,65 @@ const Home = () => {
     });
 
     const offset = 6;
+
+    const precomputedSlides = useMemo(() => {
+        if (!data || !data.results) return [];
+
+        const slides = [];
+        const tmpData = data.results.slice(1); 
+        const totalMovies = tmpData.length;
+        const maxIndex = Math.floor(totalMovies / offset);
+
+        for (let i = 0; i <= maxIndex; i++) {
+            const targetIdx = offset * i;
+            const startIdx = targetIdx - 1;
+            const endIdx = targetIdx + offset + 1;
+
+            let currentSlide = tmpData.slice(startIdx, endIdx);
+
+            if (i === maxIndex) {
+
+                const remain = offset - currentSlide.length;
+                if (remain > 0) {
+                    const fallback = tmpData.slice(tmpData.length - offset - 1);
+                    currentSlide = [...fallback, tmpData[0]];
+                }
+            } else if (i === 0) {
+
+                const startData = tmpData.slice(0, offset);
+                currentSlide = [tmpData[tmpData.length - 1], ...startData, tmpData[offset]];
+            }
+
+            slides.push(currentSlide);
+        }
+
+        return slides;
+    }, [data]);
+
     const [index, setIndex] = useState(0);
     const [leaving, setLeaving] = useState(false);
-    const [movieArr, setMovieArr] = useState<TGetMoviesResults[]>([]);
     const [isFirst, setIsFirst] = useState(true);
     const rowRef = useRef<HTMLDivElement>(null);
     const [slideDistance, setSlideDistance] = useState(0);
+    const [movieIdParams] = useSearchParams();
+    const movieId = movieIdParams.get("movieId");
+    const movieNavi = useNavigate();
+    const { scrollY } = useScroll();
+    const [y, setY] = useState(0);
+
+    const onMovieInfoModal = (movieId: number) => {
+
+        movieNavi(`/?movieId=${movieId}`);
+    };
+
+    const onOverlayClick = () => movieNavi("/");
+
+    useMotionValueEvent(scrollY, "change", (latest) => {
+
+        setY(latest);
+    });
+
+    const clickedMovie = movieId && data?.results.find(movie => movie.id === +movieId);
 
     const normalDistance = () => {
 
@@ -114,20 +253,13 @@ const Home = () => {
         if (rowRef.current?.clientWidth) {
 
             const dist = normalDistance();
-
             setSlideDistance(dist);
         }
 
     }, [rowRef.current?.clientWidth]);
 
-    useEffect(() => {
-
-        if (!isLoading && data?.results) setMovieArr(data?.results.slice(0, offset + 2));
-        
-    }, [isLoading]);
-
     const increaseIndex = () => {
-        
+
         if (data) {
 
             if (leaving) return;
@@ -137,35 +269,12 @@ const Home = () => {
 
             const currentIdx = index === maxMIdx ? 0 : index + 1;
             setIndex(currentIdx);
-
-            const tmpData = data?.results.slice(1);
-
-            const targetIdx = offset * currentIdx;
-            const startIdx = targetIdx - 1;
-            const endIdx = targetIdx + offset + 1;
-
-            let currentData = tmpData.slice(startIdx, endIdx);
+            
             if (currentIdx === maxMIdx) {
 
-                const etcIdx = offset - currentData.length;
-                if (etcIdx > 0) {
-
-                    const dist = normalDistance();
-                    setSlideDistance(dist);
-
-                    const etcStartIdx = tmpData.length - offset - 1;
-                    const etcData = tmpData.slice(etcStartIdx, tmpData.length);
-
-                    currentData = [...etcData, tmpData[0]];
-                }
-
-            } else if (currentIdx === 0) {
-
-                const startData = tmpData.slice(0, offset);
-                currentData = [tmpData[tmpData.length - 1], ...startData, tmpData[offset]];
+                const dist = normalDistance();
+                setSlideDistance(dist);
             }
-
-            setMovieArr(currentData);
 
             setLeaving(true);
 
@@ -197,13 +306,14 @@ const Home = () => {
                                         initial="hidden"
                                         animate="visible"
                                         exit="exit"
-                                        transition={{ type: "tween", duration: 1 }}
+                                        transition={{ type: "tween", duration: .8, ease: "easeInOut" }}
                                         custom={slideDistance}
                                         ref={rowRef}
                                         key={index}
+                                        layout
                                     >
                                         {
-                                            movieArr.map((movie, idx) => (
+                                            precomputedSlides[index].map((movie, idx) => (
                                                 <Box
                                                     key={movie.id}
                                                     layoutId={movie.backdrop_path}
@@ -212,8 +322,19 @@ const Home = () => {
                                                         isFirst && idx === 0
                                                             ? ""
                                                             : <BoxCont
+                                                                layoutId={movie.id + ""}
                                                                 $bgPhoto={makeImagePath(movie.backdrop_path, "w500")}
-                                                            />
+                                                                whileHover="hover"
+                                                                initial="normal"
+                                                                transition={{ type: "tween" }}
+                                                                variants={BoxContVariants}
+                                                                className="SlideCont"
+                                                                onClick={() => onMovieInfoModal(movie.id)}
+                                                            >
+                                                                <Info variants={infoVariants}>
+                                                                    <h4>{movie.title}</h4>
+                                                                </Info>
+                                                            </BoxCont>
                                                     }
                                                 </Box>
                                             ))
@@ -221,6 +342,36 @@ const Home = () => {
                                     </Row>
                                 </AnimatePresence>
                             </Slider>
+                            <AnimatePresence>
+                                {movieId ? (
+                                    <>
+                                        <Overlay
+                                            onClick={onOverlayClick}
+                                            exit={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                        />
+                                        <BigMovie
+                                            style={{ top: y + 100 }}
+                                            layoutId={movieId}
+                                        >
+                                            {clickedMovie && (
+                                                <>
+                                                    <BigCover
+                                                        style={{
+                                                            backgroundImage: `linear-gradient(0deg, #181818, transparent 50%), url(${makeImagePath(
+                                                                clickedMovie.backdrop_path,
+                                                                "w500"
+                                                            )})`,
+                                                        }}
+                                                    />
+                                                    <BigTitle>{clickedMovie.title}</BigTitle>
+                                                    <BigOverview>{clickedMovie.overview}</BigOverview>
+                                                </>
+                                            )}
+                                        </BigMovie>
+                                    </>
+                                ) : null}
+                            </AnimatePresence>
                         </>
                     )
             }

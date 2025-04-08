@@ -1,7 +1,8 @@
 import { motion, useAnimation, useScroll } from "framer-motion";
-import { Link, useMatch } from "react-router-dom";
+import { Link, useMatch, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 
 const Nav = styled(motion.nav)`
     display: flex;
@@ -50,7 +51,11 @@ const Item = styled.li`
     }
 `;
 
-const Search = styled.span`
+interface IForm {
+    keyword: string;
+}
+
+const Search = styled.form`
     color: white;
     display: flex;
     align-items: center;
@@ -109,12 +114,19 @@ const navVariants = {
 const Header = () => {
 
     const [searchOpen, setSearchOpen] = useState(false);
-    const searchRef = useRef<HTMLSpanElement>(null);
+    const searchRef = useRef<HTMLFormElement>(null);
     const homeMatch = useMatch("/");
     const tvMatch = useMatch("/tv");
     const inputAnimation = useAnimation();
     const navAnimation = useAnimation();
     const { scrollY } = useScroll();
+    const { register, handleSubmit } = useForm<IForm>();
+    const searchNavi = useNavigate();
+
+    const onValid = (data: IForm) => {
+
+        searchNavi(`/search?keyword=${data.keyword}`);
+    };
 
     const toggleSearch = () => {
 
@@ -155,7 +167,7 @@ const Header = () => {
     useEffect(() => {
 
         const unsubscribe = scrollY.on("change", (y) => {
-            
+
             if (y > 80) navAnimation.start("scroll");
             else navAnimation.start("top");
         });
@@ -193,6 +205,7 @@ const Header = () => {
             <Col>
                 <Search
                     ref={searchRef}
+                    onSubmit={handleSubmit(onValid)}
                 >
                     <motion.svg
                         onClick={toggleSearch}
@@ -214,6 +227,7 @@ const Header = () => {
                         transition={{ type: "linear" }}
                         animate={inputAnimation}
                         placeholder="제목, 사람, 장르"
+                        {...register("keyword", { required: true, minLength: 2 })}
                     />
                 </Search>
             </Col>

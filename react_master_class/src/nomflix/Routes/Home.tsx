@@ -41,7 +41,7 @@ const Overview = styled.p`
     word-break: keep-all;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
     text-overflow: ellipsis;
 `;
@@ -53,13 +53,15 @@ const Slider = styled.div`
 `;
 
 const Row = styled(motion.div)`
-    display: flex;
     position: absolute;
-    width: calc(100% + 400px);
-    left: -200px;
+    width: 100%;
+    padding: 0 60px;
+    white-space: nowrap;
+    left: calc(-16.66666667% + 20px); 
 `;
 
 const Box = styled(motion.div)`
+    display: inline-block;
     width: 16.66666667%;
     padding: 0 .2vw;
     &:nth-of-type(2) .SlideCont {transform-origin: center left;}
@@ -176,24 +178,26 @@ const Home = () => {
     const offset = 6;
 
     const precomputedSlides = useMemo(() => {
+
         if (!data || !data.results) return [];
 
         const slides = [];
-        const tmpData = data.results.slice(1); 
+        const tmpData = data.results.slice(1);
         const totalMovies = tmpData.length;
         const maxIndex = Math.floor(totalMovies / offset);
 
         for (let i = 0; i <= maxIndex; i++) {
+
             const targetIdx = offset * i;
             const startIdx = targetIdx - 1;
             const endIdx = targetIdx + offset + 1;
 
             let currentSlide = tmpData.slice(startIdx, endIdx);
-
             if (i === maxIndex) {
 
                 const remain = offset - currentSlide.length;
                 if (remain > 0) {
+
                     const fallback = tmpData.slice(tmpData.length - offset - 1);
                     currentSlide = [...fallback, tmpData[0]];
                 }
@@ -239,8 +243,8 @@ const Home = () => {
         if (rowRef.current?.clientWidth) {
 
             const rowWidth = rowRef.current?.clientWidth;
-            const boxWidth = rowWidth * 16.66666667 / 100;
-            const distance = rowWidth - (boxWidth + (boxWidth / 2));
+            const boxWidth = (rowWidth - 120) * 16.66666667 / 100;
+            const distance = boxWidth * 8;
 
             return distance;
         }
@@ -269,7 +273,7 @@ const Home = () => {
 
             const currentIdx = index === maxMIdx ? 0 : index + 1;
             setIndex(currentIdx);
-            
+
             if (currentIdx === maxMIdx) {
 
                 const dist = normalDistance();
@@ -306,17 +310,16 @@ const Home = () => {
                                         initial="hidden"
                                         animate="visible"
                                         exit="exit"
-                                        transition={{ type: "tween", duration: .8, ease: "easeInOut" }}
+                                        transition={{ type: "tween", duration: 1, ease: "easeInOut" }}
                                         custom={slideDistance}
                                         ref={rowRef}
                                         key={index}
-                                        layout
+                                        // layout
                                     >
                                         {
                                             precomputedSlides[index].map((movie, idx) => (
                                                 <Box
                                                     key={movie.id}
-                                                    layoutId={movie.backdrop_path}
                                                 >
                                                     {
                                                         isFirst && idx === 0
@@ -360,7 +363,7 @@ const Home = () => {
                                                         style={{
                                                             backgroundImage: `linear-gradient(0deg, #181818, transparent 50%), url(${makeImagePath(
                                                                 clickedMovie.backdrop_path,
-                                                                "w500"
+                                                                "w780"
                                                             )})`,
                                                         }}
                                                     />

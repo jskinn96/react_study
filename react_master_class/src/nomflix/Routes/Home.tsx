@@ -1,11 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { getMovies, IGetMovies, TGetMoviesResults } from "../Api/MovieApi";
+import { getMovies, IGetMovies } from "../Api/MovieApi";
 import styled from "styled-components";
 import { makeImagePath } from "../Utils/Utils";
-import { AnimatePresence, motion, useAnimation, useMotionValueEvent, useScroll } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import Slides from "../Components/Slides";
 
 const Wrapper = styled.div`

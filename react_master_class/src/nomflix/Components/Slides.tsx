@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { IGetMovies, TGetMoviesResults } from "../Api/MovieApi";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +8,6 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 
 const Slider = styled.div`
     position: relative;
-    top: -100px;
     width: 100%;
     padding-bottom: 8.335%;
     pointer-events: none;
@@ -55,7 +54,7 @@ const Info = styled(motion.div)`
     bottom: 0;
     h4 {
         text-align: center;
-        font-size: 18px;
+        font-size: 13px;
     }
 `;
 
@@ -104,7 +103,7 @@ const BoxContVariants = {
     },
     hover: {
         scale: 1.3,
-        y: -60,
+        y: -30,
         transition: {
             delay: .5,
             duration: .1,
@@ -124,7 +123,15 @@ const infoVariants = {
     },
 };
 
-const Slides = ({ data }: { data: IGetMovies }) => {
+interface ISlides {
+    data: IGetMovies;
+}
+
+export interface SlidesHandle {
+    onMovieInfoModal: (movieId: number) => void;
+}
+
+const Slides = forwardRef<SlidesHandle, ISlides>(({ data }, ref) => {
 
     const offset = 6;
     const tmpData = useMemo(() => data ? data.results.slice(1) : [], [data]);
@@ -143,6 +150,11 @@ const Slides = ({ data }: { data: IGetMovies }) => {
 
         movieNavi(`/?movieId=${movieId}`);
     };
+
+    //g ref를 통해 함수에 접근 가능하게 변경
+    useImperativeHandle(ref, () => ({
+        onMovieInfoModal,
+    }));
 
     const normalDistance = (dir: 1 | 2 = 2, moveBox: number = 0) => {
 
@@ -314,6 +326,6 @@ const Slides = ({ data }: { data: IGetMovies }) => {
             </AnimatePresence>
         </Slider>
     );
-}
+});
 
 export default Slides;

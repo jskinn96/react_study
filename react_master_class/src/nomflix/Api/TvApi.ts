@@ -1,41 +1,35 @@
 import axios from "axios";
+import { ApiKey, Path } from "./MovieApi";
 
-export const ApiKey = "41174b29f1c31143c31f5283b534e5b2";
-export const Path = "https://api.themoviedb.org/3";
-
-export type TGetMoviesResults = {
+export type TGetTvResults = {
     adult: boolean;
     backdrop_path: string;
-    genre_ids: [];
+    genre_ids: number[];
     id: number;
+    origin_country: string[];
     original_language: string;
-    original_title: string;
+    original_name: string;
     overview: string;
     popularity: number;
     poster_path: string;
-    release_date: string;
-    title: string;
-    video: boolean;
+    first_air_date: string;
+    name: string;
     vote_average: number;
     vote_count: number;
-};
+}
 
-export interface IGetMovies {
-    dates: {
-        maximum: string;
-        minimum: string;
-    }
+export interface IGetTv {
     page: number;
-    results: TGetMoviesResults[];
+    results: TGetTvResults[];
     total_pages: number;
     total_results: number;
 }
 
-export const getMovies = async () => {
+export const getAiringToday = async () => {
 
     try {
 
-        const res = await axios.get(`${Path}/movie/now_playing?api_key=${ApiKey}&language=en`);
+        const res = await axios.get(`${Path}/tv/airing_today?api_key=${ApiKey}`);
         const data = res.data;
 
         return data;
@@ -46,11 +40,11 @@ export const getMovies = async () => {
     }
 }
 
-export const getTopRated = async () => {
+export const getTvOnTheAir = async () => {
 
     try {
 
-        const res = await axios.get(`${Path}/movie/top_rated?api_key=${ApiKey}&language=en`);
+        const res = await axios.get(`${Path}/tv/on_the_air?api_key=${ApiKey}`);
         const data = res.data;
 
         return data;
@@ -58,15 +52,14 @@ export const getTopRated = async () => {
     } catch (error) {
 
         console.error(error);
-        throw new Error("Failed to fetch top rated");
     }
 }
 
-export const getPopular = async () => {
+export const getTvPopular = async () => {
 
     try {
 
-        const res = await axios.get(`${Path}/movie/popular?api_key=${ApiKey}&language=en`);
+        const res = await axios.get(`${Path}/tv/popular?api_key=${ApiKey}`);
         const data = res.data;
 
         return data;
@@ -74,15 +67,14 @@ export const getPopular = async () => {
     } catch (error) {
 
         console.error(error);
-        throw new Error("Failed to fetch popular");
     }
 }
 
-export const getUpcoming = async () => {
+export const getTvTopRated = async () => {
 
     try {
 
-        const res = await axios.get(`${Path}/movie/upcoming?api_key=${ApiKey}&language=en`);
+        const res = await axios.get(`${Path}/tv/top_rated?api_key=${ApiKey}`);
         const data = res.data;
 
         return data;
@@ -90,20 +82,19 @@ export const getUpcoming = async () => {
     } catch (error) {
 
         console.error(error);
-        throw new Error("Failed to fetch upcoming");
     }
 }
 
-export type IGetDetailMoviesGenres = {
+export type TGetDetailTvGenres = {
     id: number;
     name: string;
 }
-export interface IGetDetailMovies {
+export interface IGetDetailTv {
     adult: boolean;
     backdrop_path: string;
     belongs_to_collection: any;
     budget: number;
-    genres: IGetDetailMoviesGenres[];
+    genres: TGetDetailTvGenres[];
     homepage: string;
     id: number;
     imdb_id: string;
@@ -127,11 +118,11 @@ export interface IGetDetailMovies {
     vote_count: number;
 }
 
-export const getDetailMovies = async (movieId: number) => {
+export const getDetailTv = async (movieId: number) => {
 
     try {
 
-        const res = await axios.get(`${Path}/movie/${movieId}?api_key=${ApiKey}`);
+        const res = await axios.get(`${Path}/tv/${movieId}?api_key=${ApiKey}`);
         const data = res.data;
 
         return data;
@@ -170,16 +161,16 @@ export type TGetCreditsCrew = {
     job: string;
 }
 
-export interface IGetCredits {
+export interface IGetTvCredits {
     cast: TGetCreditsCast[];
     crew: TGetCreditsCrew[];
 }
 
-export const getCredits = async (movieId: number) => {
+export const getTvCredits = async (movieId: number) => {
 
     try {
 
-        const res = await axios.get(`${Path}/movie/${movieId}/credits?api_key=${ApiKey}&language=en`);
+        const res = await axios.get(`${Path}/tv/${movieId}/credits?api_key=${ApiKey}&language=en`);
         const data = res.data;
 
         const returnData = {

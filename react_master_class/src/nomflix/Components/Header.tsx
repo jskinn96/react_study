@@ -14,7 +14,8 @@ const Nav = styled(motion.nav)`
     font-size: 14px;
     padding: 20px 60px;
     color: white;
-    background-image: linear-gradient(180deg, rgba(0, 0, 0, .7) 10%, transparent); 
+    background-image: linear-gradient(180deg, rgba(0, 0, 0, .7) 10%, transparent);
+    z-index: 1; 
 `;
 
 const Col = styled.div`

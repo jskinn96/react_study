@@ -5,6 +5,7 @@ import { IGetMovies, TGetMoviesResults } from "../Api/MovieApi";
 import { useNavigate } from "react-router-dom";
 import { makeImagePath } from "../Utils/Utils";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { IGetTv, TGetTvResults } from "../Api/TvApi";
 
 const Slider = styled.div`
     position: relative;
@@ -124,14 +125,15 @@ const infoVariants = {
 };
 
 interface ISlides {
-    data: IGetMovies;
+    data: IGetMovies | IGetTv;
+    airType: string;
 }
 
 export interface SlidesHandle {
-    onMovieInfoModal: (movieId: number) => void;
+    onMovieInfoModal: (movieId: number, type: string) => void;
 }
 
-const Slides = forwardRef<SlidesHandle, ISlides>(({ data }, ref) => {
+const Slides = forwardRef<SlidesHandle, ISlides>(({ data, airType }, ref) => {
 
     const offset = 6;
     const tmpData = useMemo(() => data ? data.results.slice(1) : [], [data]);
@@ -144,11 +146,11 @@ const Slides = forwardRef<SlidesHandle, ISlides>(({ data }, ref) => {
     const [isFirst, setIsFirst] = useState(true);
     const sliderRef = useRef<HTMLDivElement>(null);
     const [slideDistance, setSlideDistance] = useState(0);
-    const [movieArr, setMovieArr] = useState<TGetMoviesResults[]>([]);
+    const [movieArr, setMovieArr] = useState<(TGetMoviesResults | TGetTvResults)[]>([]);
 
-    const onMovieInfoModal = (movieId: number) => {
+    const onMovieInfoModal = (movieId: number, type: string) => {
 
-        movieNavi(`/?movieId=${movieId}`);
+        movieNavi(`?movieId=${movieId}&type=${type}`);
     };
 
     //g ref를 통해 함수에 접근 가능하게 변경
@@ -284,17 +286,21 @@ const Slides = forwardRef<SlidesHandle, ISlides>(({ data }, ref) => {
                                     isFirst && idx === 0
                                         ? ""
                                         : <BoxCont
-                                            layoutId={movie.id + ""}
+                                            layoutId={`${movie.id}_${airType}`}
                                             $bgPhoto={makeImagePath(movie.backdrop_path, "w500")}
                                             whileHover="hover"
                                             initial="normal"
                                             transition={{ type: "tween" }}
                                             variants={BoxContVariants}
                                             className="SlideCont"
-                                            onClick={() => onMovieInfoModal(movie.id)}
+                                            onClick={() => onMovieInfoModal(movie.id, airType)}
                                         >
                                             <Info variants={infoVariants}>
-                                                <h4>{movie.title}</h4>
+                                                <h4>{
+                                                    "title" in movie
+                                                        ? movie.title
+                                                        : movie.name
+                                                }</h4>
                                             </Info>
                                         </BoxCont>
                                 }

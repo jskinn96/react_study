@@ -166,6 +166,7 @@ const Tv = () => {
                                     modalData={modalData}
                                     dfModalData={dfModalData}
                                     creditData={creditData}
+                                    isSearch={false}
                                 />
                             }
                         </>

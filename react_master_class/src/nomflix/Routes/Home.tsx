@@ -268,6 +268,7 @@ const Home = () => {
                                     modalData={modalData}
                                     dfModalData={dfModalData}
                                     creditData={creditData}
+                                    isSearch={false}
                                 />
                             }
                         </>

@@ -128,14 +128,22 @@ const ModalCloseButton = styled.button`
     }
 `;
 
-const ContentModal = ({ modalData, dfModalData, creditData }: { modalData: IGetDetailMovies | IGetDetailTv, dfModalData: TGetMoviesResults | TGetTvResults, creditData: IGetCredits | IGetTvCredits }) => {
+const ContentModal = ({ modalData, dfModalData, creditData, isSearch = false }: { modalData: IGetDetailMovies | IGetDetailTv, dfModalData: TGetMoviesResults | TGetTvResults, creditData: IGetCredits | IGetTvCredits, isSearch: boolean }) => {
 
     const movieNavi = useNavigate();
     const [movieIdParams] = useSearchParams();
     const movieId = Number(movieIdParams.get("movieId"));
+    const keyword = movieIdParams.get("keyword");
     const airType = movieIdParams.get("type");
 
-    const onOverlayClick = () => movieNavi("");
+    const onOverlayClick = !isSearch
+        ? () => movieNavi("")
+        : () => movieNavi(`?keyword=${keyword}`);
+
+    let LayoutId = !isSearch
+        ? `${movieId}_${airType}`
+        : `${movieId}_${airType}_${keyword}`;
+
 
     return (
         <AnimatePresence>
@@ -147,7 +155,7 @@ const ContentModal = ({ modalData, dfModalData, creditData }: { modalData: IGetD
                         animate={{ opacity: 1 }}
                     />
                     <BigMovie
-                        layoutId={`${movieId}_${airType}`}
+                        layoutId={LayoutId}
                     >
                         {(modalData && dfModalData && creditData) && (
                             <>

@@ -101,6 +101,7 @@ const infoVariants = {
 
 const Search = () => {
 
+    //todo 클릭 시, 모달 애니메이션이 작동하지 않아서 디버깅 필요
     const location = useLocation();
     const keyword = new URLSearchParams(location.search).get("keyword");
     const infoNavi = useNavigate();
